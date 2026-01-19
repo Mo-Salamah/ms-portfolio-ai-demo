@@ -1,0 +1,140 @@
+{
+  "id": "project1",
+  "name": "الإشراف على تخطيط الفعاليات الوطنية",
+  "name_en": "National Events Planning Oversight",
+  "description": "دعم التنسيق والمتابعة لبرنامج الفعاليات الوطنية",
+  "status": "نشط",
+  "start_date": "2027-01-01",
+  "deadline": "2027-09-01",
+  "context": {
+    "objective": "دعم التنسيق والمتابعة لبرنامج الفعاليات الوطنية من خلال جمع وتحليل بيانات الفعاليات من الجهات المنفذة، وضمان جاهزية المعلومات للجان الإشرافية.",
+    "scope": [
+      "التنسيق مع الجهات المنفذة لجمع بيانات الفعاليات",
+      "تحليل البيانات وتحديد الفجوات",
+      "إعداد التقارير الدورية للجنة الإشرافية",
+      "متابعة استكمال المعلومات الناقصة"
+    ],
+    "stakeholders": [
+      {
+        "name": "الجهة المنفذة (أ)",
+        "role": "جهة تنفيذية رئيسية",
+        "contact_status": "نشط"
+      },
+      {
+        "name": "الجهة المنفذة (ب)",
+        "role": "جهة تنفيذية رئيسية",
+        "contact_status": "متأخر في التسليم"
+      },
+      {
+        "name": "الجهة المنفذة (ج)",
+        "role": "جهة تنفيذية رئيسية",
+        "contact_status": "نشط"
+      },
+      {
+        "name": "اللجنة الإشرافية العليا",
+        "role": "جهة إشرافية",
+        "contact_status": "نشط"
+      },
+      {
+        "name": "فريق التنسيق والمتابعة",
+        "role": "فريق العمل",
+        "contact_status": "نشط"
+      }
+    ],
+    "key_dates": [
+      {
+        "date": "2027-09-01",
+        "event": "اجتماع اللجنة الإشرافية",
+        "importance": "critical"
+      },
+      {
+        "date": "2027-08-15",
+        "event": "الموعد النهائي لاستلام جميع البيانات",
+        "importance": "high"
+      },
+      {
+        "date": "2027-08-01",
+        "event": "مراجعة التقرير الأولي",
+        "importance": "medium"
+      }
+    ]
+  },
+  "memory": [
+    {
+      "date": "17 يناير 2027",
+      "entry": "تم استلام ملف الفعاليات المحدث من الجهة المنفذة (أ)",
+      "type": "milestone"
+    },
+    {
+      "date": "15 يناير 2027",
+      "entry": "الجهة المنفذة (ب) طلبت تمديد موعد تسليم البيانات",
+      "type": "issue"
+    },
+    {
+      "date": "10 يناير 2027",
+      "entry": "اجتماع تنسيقي مع فريق المتابعة - تم الاتفاق على قالب موحد",
+      "type": "meeting"
+    },
+    {
+      "date": "5 يناير 2027",
+      "entry": "إرسال طلب البيانات الأولي لجميع الجهات",
+      "type": "action"
+    }
+  ],
+  "agents": [
+    {
+      "id": "coordinator",
+      "name": "وكيل التنسيق الرئيسي",
+      "name_en": "Coordinator Agent",
+      "description": "توجيه الطلبات وتنسيق سير العمل",
+      "is_orchestrator": true,
+      "capabilities": ["routing", "summarization", "coordination"]
+    },
+    {
+      "id": "data_analysis",
+      "name": "وكيل تحليل البيانات",
+      "name_en": "Data Analysis Agent",
+      "description": "تحليل بيانات الفعاليات وإنتاج التقارير التحليلية",
+      "is_orchestrator": false,
+      "capabilities": ["data_analysis", "statistics", "visualization"]
+    },
+    {
+      "id": "followup",
+      "name": "وكيل المتابعة والتواصل",
+      "name_en": "Follow-up Agent",
+      "description": "تحديد المعلومات الناقصة وصياغة رسائل المتابعة",
+      "is_orchestrator": false,
+      "capabilities": ["gap_analysis", "email_drafting", "prioritization"]
+    },
+    {
+      "id": "reporting",
+      "name": "وكيل إعداد التقارير",
+      "name_en": "Reporting Agent",
+      "description": "تجميع النتائج وإعداد تقارير اللجان",
+      "is_orchestrator": false,
+      "capabilities": ["report_generation", "summarization", "formatting"]
+    },
+    {
+      "id": "quality_check",
+      "name": "وكيل فحص الجودة",
+      "name_en": "Quality Check Agent",
+      "description": "التحقق من اكتمال البيانات وجودتها",
+      "is_orchestrator": false,
+      "capabilities": ["validation", "quality_scoring", "issue_detection"]
+    }
+  ],
+  "data_sources": [
+    {
+      "name": "ملف الفعاليات الرئيسي",
+      "type": "excel",
+      "status": "active",
+      "last_updated": "2027-01-17"
+    },
+    {
+      "name": "نموذج جمع البيانات",
+      "type": "form",
+      "status": "active",
+      "last_updated": "2027-01-10"
+    }
+  ]
+}

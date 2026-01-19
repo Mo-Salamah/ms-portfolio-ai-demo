@@ -1,0 +1,143 @@
+{
+  "id": "project2",
+  "name": "التخطيط للاحتفاليات الكبرى",
+  "name_en": "Major Celebrations Planning",
+  "description": "تطوير الرؤية والإطار الاستراتيجي لاحتفالية وطنية تاريخية",
+  "status": "نشط",
+  "start_date": "2027-01-03",
+  "duration_weeks": 20,
+  "context": {
+    "objective": "تطوير الرؤية والإطار الاستراتيجي لاحتفالية وطنية تاريخية من خلال دراسة التجارب الدولية المشابهة واستخلاص الدروس المستفادة.",
+    "scope": [
+      "دراسات مقارنة للاحتفاليات الدولية الكبرى",
+      "تطوير إطار مؤشرات الأداء",
+      "تحديد خيارات التموضع الاستراتيجي",
+      "إعداد محتوى جاهز للعروض التقديمية"
+    ],
+    "expected_outputs": [
+      {
+        "name": "تقرير المقارنة المعيارية",
+        "status": "قيد التنفيذ",
+        "progress": 60
+      },
+      {
+        "name": "إطار مؤشرات الأداء الرئيسية",
+        "status": "قيد التخطيط",
+        "progress": 30
+      },
+      {
+        "name": "خيارات الرؤية والتموضع",
+        "status": "قيد التخطيط",
+        "progress": 20
+      },
+      {
+        "name": "عروض تقديمية للقيادة",
+        "status": "لم يبدأ",
+        "progress": 0
+      }
+    ],
+    "reference_cases": [
+      {
+        "name": "احتفالية سانت بطرسبرغ 300 عام",
+        "location": "روسيا",
+        "year": 2003,
+        "status": "مكتمل البحث"
+      },
+      {
+        "name": "يوبيل روما الألفي",
+        "location": "إيطاليا",
+        "year": 2000,
+        "status": "قيد البحث"
+      },
+      {
+        "name": "المئوية الأولمبية لبرشلونة",
+        "location": "إسبانيا",
+        "year": 1992,
+        "status": "قيد البحث"
+      },
+      {
+        "name": "احتفالية باريس 2000",
+        "location": "فرنسا",
+        "year": 2000,
+        "status": "محدد للبحث"
+      },
+      {
+        "name": "يوبيل الملكة إليزابيث",
+        "location": "المملكة المتحدة",
+        "year": 2022,
+        "status": "محدد للبحث"
+      }
+    ]
+  },
+  "memory": [
+    {
+      "date": "16 يناير 2027",
+      "entry": "اكتمال البحث المعمق لتجربة سانت بطرسبرغ",
+      "type": "milestone"
+    },
+    {
+      "date": "12 يناير 2027",
+      "entry": "اعتماد هيكل تقرير المقارنة المعيارية",
+      "type": "decision"
+    },
+    {
+      "date": "8 يناير 2027",
+      "entry": "تحديد 5 تجارب دولية للدراسة",
+      "type": "milestone"
+    },
+    {
+      "date": "3 يناير 2027",
+      "entry": "انطلاق مرحلة البحث والتحليل",
+      "type": "milestone"
+    }
+  ],
+  "agents": [
+    {
+      "id": "strategic_planning",
+      "name": "وكيل التخطيط الاستراتيجي",
+      "name_en": "Strategic Planning Agent",
+      "description": "إدارة سير العمل الاستراتيجي والتنسيق",
+      "is_orchestrator": true,
+      "capabilities": ["workflow_management", "request_refinement", "coordination"]
+    },
+    {
+      "id": "benchmarking",
+      "name": "وكيل المقارنة المعيارية",
+      "name_en": "Benchmarking Agent",
+      "description": "إجراء البحوث المقارنة وتحليل التجارب الدولية",
+      "is_orchestrator": false,
+      "capabilities": ["research", "comparative_analysis", "lesson_extraction"]
+    },
+    {
+      "id": "kpi",
+      "name": "وكيل مؤشرات الأداء",
+      "name_en": "KPI Agent",
+      "description": "توصية مؤشرات الأداء وتحديد طرق القياس",
+      "is_orchestrator": false,
+      "capabilities": ["kpi_design", "measurement_methods", "target_setting"]
+    },
+    {
+      "id": "critique",
+      "name": "وكيل المراجعة والنقد",
+      "name_en": "Critique Agent",
+      "description": "مراجعة المخرجات وتقديم ملاحظات بناءة",
+      "is_orchestrator": false,
+      "capabilities": ["review", "feedback", "quality_assessment"]
+    },
+    {
+      "id": "content_prep",
+      "name": "وكيل إعداد المحتوى",
+      "name_en": "Content Preparation Agent",
+      "description": "تنسيق المحتوى للعروض التقديمية",
+      "is_orchestrator": false,
+      "capabilities": ["slide_formatting", "executive_summaries", "visualization"]
+    }
+  ],
+  "presentation_guidelines": {
+    "action_titles": true,
+    "max_points_per_slide": 6,
+    "include_data": true,
+    "presenter_notes": true,
+    "target_audience": "قيادات حكومية عليا"
+  }
+}
