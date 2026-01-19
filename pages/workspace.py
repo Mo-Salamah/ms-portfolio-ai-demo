@@ -162,13 +162,9 @@ def render_welcome_message():
     for i, example in enumerate(examples):
         with cols[i % 2]:
             if st.button(example, key=f"example_{i}", use_container_width=True):
-                messages_key = f"messages_{project_id}"
-                if messages_key not in st.session_state:
-                    st.session_state[messages_key] = []
-                st.session_state[messages_key].append({
-                    "role": "user",
-                    "content": example
-                })
+                # Use the pending message pattern for consistency
+                pending_key = f"pending_message_{project_id}"
+                st.session_state[pending_key] = example
                 st.rerun()
 
 
@@ -223,6 +219,41 @@ def render_sidebar():
                 st.rerun()
 
 
+def process_user_message(prompt: str, messages_key: str):
+    """Process a user message and generate response."""
+    # Add user message to history
+    st.session_state[messages_key].append({
+        "role": "user",
+        "content": prompt
+    })
+
+    # Get response from orchestrator
+    try:
+        orchestrator = get_orchestrator()
+        response = orchestrator.invoke(prompt)
+
+        # Update active agent
+        st.session_state.active_agent_id = response.metadata.get('agent_id')
+
+        # Add response to history
+        st.session_state[messages_key].append({
+            "role": "assistant",
+            "content": response.content,
+            "thinking": response.thinking,
+            "agent": response.agent_name,
+            "agent_en": response.agent_name_en,
+            "metadata": response.metadata
+        })
+
+    except Exception as e:
+        error_message = f"Sorry, an error occurred: {str(e)}"
+        st.session_state[messages_key].append({
+            "role": "assistant",
+            "content": error_message,
+            "agent": "System"
+        })
+
+
 def render_chat_interface():
     """Render the main chat interface."""
     project_id = st.session_state.get('selected_project', 'project1')
@@ -231,6 +262,16 @@ def render_chat_interface():
     # Initialize messages if needed
     if messages_key not in st.session_state:
         st.session_state[messages_key] = []
+
+    # Check if there's a pending message to process
+    pending_key = f"pending_message_{project_id}"
+    if pending_key in st.session_state and st.session_state[pending_key]:
+        prompt = st.session_state[pending_key]
+        st.session_state[pending_key] = None
+
+        # Show processing indicator
+        with st.spinner("Thinking..."):
+            process_user_message(prompt, messages_key)
 
     # Show welcome message if no messages
     if not st.session_state[messages_key]:
@@ -242,79 +283,9 @@ def render_chat_interface():
 
     # Chat input
     if prompt := st.chat_input("Type your message here..."):
-        # Add user message to history
-        st.session_state[messages_key].append({
-            "role": "user",
-            "content": prompt
-        })
-
-        # Display user message
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        # Get response from orchestrator
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                try:
-                    orchestrator = get_orchestrator()
-                    response = orchestrator.invoke(prompt)
-
-                    # Update active agent
-                    st.session_state.active_agent_id = response.metadata.get('agent_id')
-
-                    # Display response
-                    st.markdown(response.content)
-
-                    # Show thinking if enabled
-                    if st.session_state.get('show_thinking', True) and response.thinking:
-                        with st.expander("Agent Thinking", expanded=False):
-                            st.markdown(f"""
-                            <div style="
-                                background-color: #f8f9fa;
-                                padding: 12px;
-                                border-radius: 8px;
-                                border-left: 4px solid {THEME['accent']};
-                                margin: 8px 0;
-                                white-space: pre-wrap;
-                                color: #333;
-                                font-size: 0.9em;
-                            ">
-                            {response.thinking.replace(chr(10), '<br/>')}
-                            </div>
-                            """, unsafe_allow_html=True)
-
-                    # Show agent badge with English name
-                    agent_name = response.agent_name_en or response.agent_name
-                    st.markdown(f"""
-                    <span style="
-                        background-color: {THEME['primary']};
-                        color: white;
-                        padding: 4px 12px;
-                        border-radius: 16px;
-                        font-size: 12px;
-                        display: inline-block;
-                        margin-top: 8px;
-                    ">{agent_name}</span>
-                    """, unsafe_allow_html=True)
-
-                    # Add to history
-                    st.session_state[messages_key].append({
-                        "role": "assistant",
-                        "content": response.content,
-                        "thinking": response.thinking,
-                        "agent": response.agent_name,
-                        "agent_en": response.agent_name_en,
-                        "metadata": response.metadata
-                    })
-
-                except Exception as e:
-                    error_message = f"Sorry, an error occurred: {str(e)}"
-                    st.error(error_message)
-                    st.session_state[messages_key].append({
-                        "role": "assistant",
-                        "content": error_message,
-                        "agent": "System"
-                    })
+        # Store the message and rerun to process it
+        st.session_state[pending_key] = prompt
+        st.rerun()
 
 
 def render_workspace_page():
