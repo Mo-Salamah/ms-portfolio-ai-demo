@@ -1,6 +1,5 @@
 """
 Content Preparation Agent for Project 2 - Major Celebrations Planning
-وكيل إعداد المحتوى للمشروع الثاني
 
 Formats content for professional presentations.
 """
@@ -10,52 +9,53 @@ from ..base_agent import BaseAgent, AgentResponse
 from config import PRESENTATION_GUIDELINES
 
 
-CONTENT_PREP_SYSTEM_PROMPT = f"""أنت وكيل إعداد المحتوى المتخصص في تحويل المحتوى إلى عروض تقديمية احترافية.
+CONTENT_PREP_SYSTEM_PROMPT = f"""You are a Content Preparation Agent specialized in converting content into professional presentations.
+
+IMPORTANT: Always respond in English.
 
 {PRESENTATION_GUIDELINES}
 
-مهامك الرئيسية:
-1. تحويل المحتوى إلى شرائح عرض منظمة
-2. صياغة عناوين تنفيذية قوية
-3. تبسيط المحتوى دون فقدان الجوهر
-4. إضافة ملاحظات للمقدم
+Your main tasks:
+1. Convert content into organized presentation slides
+2. Craft strong action titles
+3. Simplify content without losing substance
+4. Add presenter notes
 
-هيكل الشريحة المثالي:
+Ideal Slide Structure:
 ```
-## [العنوان التنفيذي - جملة كاملة تلخص الرسالة]
+## [Action Title - A complete sentence summarizing the message]
 
-- النقطة الأولى (مدعومة ببيانات)
-- النقطة الثانية
-- النقطة الثالثة
-- النقطة الرابعة
+- First point (supported with data)
+- Second point
+- Third point
+- Fourth point
 
 ---
-*ملاحظة للمقدم: [توجيهات إضافية]*
+*Presenter Note: [Additional guidance]*
 ```
 
-الجمهور المستهدف:
-- قيادات حكومية عليا
-- لجان إشرافية
-- صناع قرار
+Target Audience:
+- Senior government leadership
+- Oversight committees
+- Decision makers
 
-أسلوب المحتوى:
-- رسمي واحترافي
-- مباشر ومركز
-- مدعوم بالأرقام
-- قابل للعرض في 2-3 دقائق لكل شريحة"""
+Content Style:
+- Formal and professional
+- Direct and focused
+- Supported with numbers
+- Presentable in 2-3 minutes per slide"""
 
 
 class ContentPrepAgent(BaseAgent):
     """
     Content Preparation specialist for Project 2.
-    وكيل إعداد المحتوى للمشروع الثاني
     """
 
     def __init__(self):
         super().__init__(
-            name="وكيل إعداد المحتوى",
+            name="Content Preparation Agent",
             name_en="Content Preparation Agent",
-            description="تنسيق المحتوى للعروض التقديمية",
+            description="Format content for presentations",
             temperature=0.5
         )
 
@@ -66,7 +66,7 @@ class ContentPrepAgent(BaseAgent):
         self,
         content: str,
         num_slides: Optional[int] = None,
-        target_audience: str = "قيادات حكومية"
+        target_audience: str = "government leadership"
     ) -> AgentResponse:
         """
         Format content into presentation slides.
@@ -80,28 +80,28 @@ class ContentPrepAgent(BaseAgent):
             AgentResponse with slide-formatted content
         """
         self._clear_thinking()
-        self._log_thinking("تحليل المحتوى لتحويله إلى شرائح عرض...")
+        self._log_thinking("Analyzing content for slide conversion...")
 
-        format_request = f"""## المحتوى المطلوب تحويله لعرض تقديمي
+        format_request = f"""## Content to Convert to Presentation
 
-**الجمهور المستهدف:** {target_audience}
+**Target Audience:** {target_audience}
 """
         if num_slides:
-            format_request += f"**عدد الشرائح المستهدف:** {num_slides}\n"
+            format_request += f"**Target Number of Slides:** {num_slides}\n"
 
         format_request += f"""
-**المحتوى الأصلي:**
+**Original Content:**
 {content}
 
 ---
 
-يرجى تحويل هذا المحتوى إلى شرائح عرض احترافية مع:
-1. عناوين تنفيذية قوية (جمل كاملة)
-2. نقاط موجزة ومباشرة (4-6 لكل شريحة)
-3. بيانات داعمة حيث أمكن
-4. ملاحظات للمقدم"""
+Please convert this content into professional presentation slides with:
+1. Strong action titles (complete sentences)
+2. Concise and direct points (4-6 per slide)
+3. Supporting data where possible
+4. Presenter notes"""
 
-        self._log_thinking(f"إعداد محتوى لـ {target_audience}")
+        self._log_thinking(f"Preparing content for {target_audience}")
 
         return self.invoke(format_request)
 
@@ -113,12 +113,12 @@ class ContentPrepAgent(BaseAgent):
     ) -> AgentResponse:
         """Prepare content for presentations."""
         self._clear_thinking()
-        self._log_thinking("بدء تحويل المحتوى إلى تنسيق العرض التقديمي...")
+        self._log_thinking("Starting content conversion to presentation format...")
 
         messages = self._build_messages(user_message, context, conversation_history)
 
         try:
-            self._log_thinking("جارٍ تصميم هيكل الشرائح...")
+            self._log_thinking("Designing slide structure...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -129,7 +129,7 @@ class ContentPrepAgent(BaseAgent):
             )
 
             response_text = response.content[0].text
-            self._log_thinking("تم إعداد محتوى العرض التقديمي بنجاح")
+            self._log_thinking("Presentation content prepared successfully")
 
             metadata = {
                 "model": self.model,
@@ -147,9 +147,9 @@ class ContentPrepAgent(BaseAgent):
             )
 
         except Exception as e:
-            self._log_thinking(f"حدث خطأ: {str(e)}")
+            self._log_thinking(f"Error occurred: {str(e)}")
             return AgentResponse(
-                content=f"عذراً، حدث خطأ أثناء تنسيق المحتوى: {str(e)}",
+                content=f"Sorry, an error occurred while formatting content: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,
@@ -164,18 +164,18 @@ class ContentPrepAgent(BaseAgent):
     ) -> AgentResponse:
         """Create an executive summary presentation."""
         self._clear_thinking()
-        self._log_thinking("إعداد ملخص تنفيذي...")
+        self._log_thinking("Preparing executive summary...")
 
-        summary_request = f"""أعد ملخصاً تنفيذياً من {max_slides} شرائح كحد أقصى للمحتوى التالي:
+        summary_request = f"""Create an executive summary of maximum {max_slides} slides for the following content:
 
 {content}
 
-الملخص التنفيذي يجب أن يشمل:
-1. شريحة العنوان
-2. الرسائل الرئيسية (1-2 شرائح)
-3. التوصيات الأساسية (1-2 شرائح)
-4. الخطوات التالية (1 شريحة)
+The executive summary should include:
+1. Title slide
+2. Key messages (1-2 slides)
+3. Core recommendations (1-2 slides)
+4. Next steps (1 slide)
 
-ركز على أهم النقاط فقط للقيادة العليا."""
+Focus only on the most important points for senior leadership."""
 
         return self.invoke(summary_request)

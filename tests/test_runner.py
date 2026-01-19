@@ -25,7 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from dotenv import load_dotenv
 load_dotenv()
 
-from demo_prompts import ALL_DEMO_PROMPTS, get_project_prompts
+from tests.demo_prompts import ALL_DEMO_PROMPTS, get_project_prompts
 
 # Configuration
 MODEL = "claude-sonnet-4-20250514"

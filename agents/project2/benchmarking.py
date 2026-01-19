@@ -1,6 +1,5 @@
 """
 Benchmarking Agent for Project 2 - Major Celebrations Planning
-وكيل المقارنة المعيارية للمشروع الثاني
 
 Enhanced version for international benchmarking research.
 """
@@ -10,45 +9,46 @@ from ..base_agent import BaseAgent, AgentResponse
 from utils.knowledge_base import KnowledgeBase
 
 
-BENCHMARKING_SYSTEM_PROMPT = """أنت وكيل المقارنة المعيارية المتخصص في دراسة الاحتفاليات والفعاليات الدولية الكبرى.
+BENCHMARKING_SYSTEM_PROMPT = """You are a Benchmarking Agent specialized in studying major international celebrations and events.
 
-خبراتك تشمل:
-1. تحليل تجارب الاحتفاليات الوطنية الكبرى
-2. استخلاص الدروس المستفادة (للتبني، للتكييف، للتجنب)
-3. تحديد عوامل النجاح والتحديات
-4. تقديم توصيات قابلة للتطبيق محلياً
+IMPORTANT: Always respond in English.
 
-التجارب الدولية المتوفرة في قاعدة المعرفة:
-- احتفالية سانت بطرسبرغ 300 عام (روسيا 2003)
-- يوبيل روما الألفي (إيطاليا 2000)
-- المئوية الأولمبية لبرشلونة (إسبانيا 1992)
+Your expertise includes:
+1. Analyzing major national celebration experiences
+2. Extracting lessons learned (to adopt, to adapt, to avoid)
+3. Identifying success factors and challenges
+4. Providing recommendations applicable to local context
 
-منهجية التحليل:
-1. السياق والأهداف
-2. الهيكل التنظيمي
-3. الميزانية والتمويل
-4. المخرجات والإنجازات
-5. التحديات والدروس المستفادة
-6. التوصيات للسياق المحلي
+International experiences available in the knowledge base:
+- St. Petersburg 300th Anniversary (Russia 2003)
+- Rome Jubilee 2000 (Italy 2000)
+- Barcelona Olympic Centennial (Spain 1992)
 
-أسلوب الإخراج:
-- تحليل مقارن منظم
-- جداول للمقارنة
-- تصنيف واضح للدروس (تبني/تكييف/تجنب)
-- توصيات محددة وقابلة للتنفيذ"""
+Analysis methodology:
+1. Context and objectives
+2. Organizational structure
+3. Budget and funding
+4. Outputs and achievements
+5. Challenges and lessons learned
+6. Recommendations for local context
+
+Output style:
+- Structured comparative analysis
+- Comparison tables
+- Clear lesson classification (adopt/adapt/avoid)
+- Specific and actionable recommendations"""
 
 
 class BenchmarkingAgent(BaseAgent):
     """
     Benchmarking specialist for Project 2.
-    وكيل المقارنة المعيارية للمشروع الثاني
     """
 
     def __init__(self):
         super().__init__(
-            name="وكيل المقارنة المعيارية",
+            name="Benchmarking Agent",
             name_en="Benchmarking Agent",
-            description="إجراء البحوث المقارنة وتحليل التجارب الدولية",
+            description="Conduct comparative research and analyze international experiences",
             temperature=0.5
         )
         self.knowledge_base = KnowledgeBase()
@@ -65,48 +65,48 @@ class BenchmarkingAgent(BaseAgent):
 
         # Return all benchmarks
         benchmarks = self.knowledge_base.get_all_benchmarks()
-        context = "## التجارب الدولية المتوفرة:\n\n"
+        context = "## Available International Experiences:\n\n"
         for b in benchmarks:
             context += self._format_single_benchmark(b) + "\n---\n"
         return context
 
     def _format_single_benchmark(self, benchmark: Dict) -> str:
         """Format a single benchmark for context."""
-        output = f"""### {benchmark.get('name', 'غير مسمى')}
+        output = f"""### {benchmark.get('name', 'Unnamed')}
 
-**الموقع:** {benchmark.get('location', 'غير محدد')}
-**السنة:** {benchmark.get('year', 'غير محدد')}
-**المدة:** {benchmark.get('duration', 'غير محدد')}
+**Location:** {benchmark.get('location', 'Unspecified')}
+**Year:** {benchmark.get('year', 'Unspecified')}
+**Duration:** {benchmark.get('duration', 'Unspecified')}
 
-**الوصف:**
-{benchmark.get('description', 'لا يوجد وصف')}
+**Description:**
+{benchmark.get('description', 'No description')}
 
-**الأهداف:**
+**Objectives:**
 """
         for obj in benchmark.get('objectives', []):
             output += f"- {obj}\n"
 
-        output += f"\n**المخرجات الرئيسية:**\n"
+        output += f"\n**Key Outcomes:**\n"
         for outcome in benchmark.get('key_outcomes', []):
             output += f"- {outcome}\n"
 
-        output += f"\n**المقاييس:**\n"
+        output += f"\n**Metrics:**\n"
         metrics = benchmark.get('metrics', {})
         for key, value in metrics.items():
             output += f"- {key}: {value}\n"
 
-        output += f"\n**الدروس المستفادة:**\n"
+        output += f"\n**Lessons Learned:**\n"
         lessons = benchmark.get('lessons_learned', {})
         if lessons.get('adopt'):
-            output += "\n*للتبني:*\n"
+            output += "\n*To Adopt:*\n"
             for lesson in lessons['adopt']:
                 output += f"  ✅ {lesson}\n"
         if lessons.get('adapt'):
-            output += "\n*للتكييف:*\n"
+            output += "\n*To Adapt:*\n"
             for lesson in lessons['adapt']:
                 output += f"  🔄 {lesson}\n"
         if lessons.get('avoid'):
-            output += "\n*للتجنب:*\n"
+            output += "\n*To Avoid:*\n"
             for lesson in lessons['avoid']:
                 output += f"  ⚠️ {lesson}\n"
 
@@ -120,41 +120,42 @@ class BenchmarkingAgent(BaseAgent):
     ) -> AgentResponse:
         """Provide benchmarking analysis."""
         self._clear_thinking()
-        self._log_thinking("جارٍ تحليل طلب المقارنة المعيارية...")
+        self._log_thinking("Analyzing benchmarking request...")
 
         # Determine which case studies are relevant
         case_keywords = {
-            "سانت بطرسبرغ": "سانت بطرسبرغ",
-            "بطرسبورغ": "سانت بطرسبرغ",
-            "روسيا": "سانت بطرسبرغ",
-            "روما": "روما",
-            "إيطاليا": "روما",
-            "يوبيل": "روما",
-            "برشلونة": "برشلونة",
-            "إسبانيا": "برشلونة",
-            "أولمبي": "برشلونة"
+            "st. petersburg": "St. Petersburg",
+            "petersburg": "St. Petersburg",
+            "russia": "St. Petersburg",
+            "rome": "Rome",
+            "italy": "Rome",
+            "jubilee": "Rome",
+            "barcelona": "Barcelona",
+            "spain": "Barcelona",
+            "olympic": "Barcelona"
         }
 
         specific_case = None
+        message_lower = user_message.lower()
         for keyword, case in case_keywords.items():
-            if keyword in user_message:
+            if keyword in message_lower:
                 specific_case = case
                 break
 
         benchmark_context = self._get_benchmark_context(specific_case)
-        self._log_thinking(f"تم تحميل بيانات المقارنة المعيارية")
+        self._log_thinking("Loaded benchmark data from knowledge base")
 
-        enhanced_message = f"""طلب المستخدم: {user_message}
+        enhanced_message = f"""User request: {user_message}
 
-البيانات المتاحة من قاعدة المعرفة:
+Data available from knowledge base:
 {benchmark_context}
 
-قدم تحليلاً مقارناً شاملاً بناءً على الطلب والبيانات المتاحة."""
+Provide a comprehensive comparative analysis based on the request and available data."""
 
         messages = self._build_messages(enhanced_message, context, conversation_history)
 
         try:
-            self._log_thinking("جارٍ إعداد التحليل المقارن...")
+            self._log_thinking("Preparing comparative analysis...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -165,7 +166,7 @@ class BenchmarkingAgent(BaseAgent):
             )
 
             response_text = response.content[0].text
-            self._log_thinking("تم إعداد التحليل المقارن بنجاح")
+            self._log_thinking("Comparative analysis prepared successfully")
 
             metadata = {
                 "model": self.model,
@@ -184,9 +185,9 @@ class BenchmarkingAgent(BaseAgent):
             )
 
         except Exception as e:
-            self._log_thinking(f"حدث خطأ: {str(e)}")
+            self._log_thinking(f"Error occurred: {str(e)}")
             return AgentResponse(
-                content=f"عذراً، حدث خطأ أثناء التحليل: {str(e)}",
+                content=f"Sorry, an error occurred during analysis: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,
@@ -196,5 +197,5 @@ class BenchmarkingAgent(BaseAgent):
 
     def compare_cases(self, cases: List[str]) -> AgentResponse:
         """Compare multiple benchmark cases."""
-        request = f"قدم مقارنة تفصيلية بين التجارب التالية: {', '.join(cases)}"
+        request = f"Provide a detailed comparison between the following experiences: {', '.join(cases)}"
         return self.invoke(request)

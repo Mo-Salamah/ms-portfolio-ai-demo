@@ -1,6 +1,5 @@
 """
 KPI Agent for Project 2 - Major Celebrations Planning
-وكيل مؤشرات الأداء للمشروع الثاني
 
 Recommends KPIs and measurement methods for the celebration.
 """
@@ -10,47 +9,48 @@ from ..base_agent import BaseAgent, AgentResponse
 from utils.knowledge_base import KnowledgeBase
 
 
-KPI_SYSTEM_PROMPT = """أنت وكيل مؤشرات الأداء المتخصص في قياس نجاح الاحتفاليات الوطنية الكبرى.
+KPI_SYSTEM_PROMPT = """You are a KPI Agent specialized in measuring the success of major national celebrations.
 
-خبراتك تشمل:
-1. تصميم مؤشرات الأداء الرئيسية (KPIs)
-2. تحديد طرق القياس والمتابعة
-3. وضع المستهدفات الواقعية
-4. ربط المؤشرات بالأهداف الاستراتيجية
+IMPORTANT: Always respond in English.
 
-فئات المؤشرات:
-- الأثر الاقتصادي (الإنفاق، التوظيف، الاستثمارات)
-- المشاركة المجتمعية (الزوار، المتطوعين، الرضا)
-- التغطية الإعلامية (الوصول، التفاعل، السمعة)
-- الإرث والاستدامة (البنية التحتية، القدرات، الثقافة)
-- الكفاءة التشغيلية (الالتزام بالميزانية والجدول)
+Your expertise includes:
+1. Designing Key Performance Indicators (KPIs)
+2. Identifying measurement and monitoring methods
+3. Setting realistic targets
+4. Linking indicators to strategic objectives
 
-منهجية التصميم:
-1. فهم الأهداف الاستراتيجية
-2. تحديد المؤشرات الرئيسية والفرعية
-3. تحديد طريقة القياس ومصدر البيانات
-4. وضع المستهدفات والحدود
-5. تحديد تكرار القياس والمسؤول
+Indicator Categories:
+- Economic Impact (spending, employment, investments)
+- Community Engagement (visitors, volunteers, satisfaction)
+- Media Coverage (reach, engagement, reputation)
+- Legacy and Sustainability (infrastructure, capabilities, culture)
+- Operational Efficiency (budget and schedule adherence)
 
-معايير المؤشر الجيد (SMART):
-- محدد (Specific)
-- قابل للقياس (Measurable)
-- قابل للتحقيق (Achievable)
-- ذو صلة (Relevant)
-- محدد بزمن (Time-bound)"""
+Design Methodology:
+1. Understand strategic objectives
+2. Define main and sub-indicators
+3. Determine measurement method and data source
+4. Set targets and thresholds
+5. Define measurement frequency and responsible party
+
+Good Indicator Criteria (SMART):
+- Specific
+- Measurable
+- Achievable
+- Relevant
+- Time-bound"""
 
 
 class KPIAgent(BaseAgent):
     """
     KPI specialist for Project 2.
-    وكيل مؤشرات الأداء للمشروع الثاني
     """
 
     def __init__(self):
         super().__init__(
-            name="وكيل مؤشرات الأداء",
+            name="KPI Agent",
             name_en="KPI Agent",
-            description="توصية مؤشرات الأداء وتحديد طرق القياس",
+            description="Recommend KPIs and define measurement methods",
             temperature=0.4
         )
         self.knowledge_base = KnowledgeBase()
@@ -65,12 +65,12 @@ class KPIAgent(BaseAgent):
         else:
             kpis = self.knowledge_base.get_all_kpis()
 
-        context = "## مؤشرات الأداء المتاحة في قاعدة المعرفة:\n\n"
+        context = "## KPIs Available in Knowledge Base:\n\n"
 
         # Group by category
         by_category = {}
         for kpi in kpis:
-            cat = kpi.get('category', 'أخرى')
+            cat = kpi.get('category', 'Other')
             if cat not in by_category:
                 by_category[cat] = []
             by_category[cat].append(kpi)
@@ -78,13 +78,13 @@ class KPIAgent(BaseAgent):
         for cat, cat_kpis in by_category.items():
             context += f"### {cat}\n\n"
             for kpi in cat_kpis:
-                context += f"**{kpi.get('name', 'غير مسمى')}**\n"
-                context += f"- الوصف: {kpi.get('description', 'لا يوجد')}\n"
-                context += f"- الوحدة: {kpi.get('unit', 'غير محدد')}\n"
-                context += f"- طريقة القياس: {kpi.get('measurement_method', 'غير محدد')}\n"
-                context += f"- التكرار: {kpi.get('frequency', 'غير محدد')}\n"
+                context += f"**{kpi.get('name', 'Unnamed')}**\n"
+                context += f"- Description: {kpi.get('description', 'None')}\n"
+                context += f"- Unit: {kpi.get('unit', 'Unspecified')}\n"
+                context += f"- Measurement Method: {kpi.get('measurement_method', 'Unspecified')}\n"
+                context += f"- Frequency: {kpi.get('frequency', 'Unspecified')}\n"
                 if kpi.get('benchmark_value'):
-                    context += f"- القيمة المرجعية: {kpi['benchmark_value']}\n"
+                    context += f"- Benchmark Value: {kpi['benchmark_value']}\n"
                 context += "\n"
 
         return context
@@ -97,42 +97,43 @@ class KPIAgent(BaseAgent):
     ) -> AgentResponse:
         """Provide KPI recommendations."""
         self._clear_thinking()
-        self._log_thinking("جارٍ تحليل طلب مؤشرات الأداء...")
+        self._log_thinking("Analyzing KPI request...")
 
         # Determine relevant category
         category_keywords = {
-            "اقتصاد": "الأثر الاقتصادي",
-            "مالي": "الأثر الاقتصادي",
-            "مجتمع": "المشاركة المجتمعية",
-            "زوار": "المشاركة المجتمعية",
-            "إعلام": "التغطية الإعلامية",
-            "تواصل": "التغطية الإعلامية",
-            "إرث": "الإرث والاستدامة",
-            "استدامة": "الإرث والاستدامة",
-            "تشغيل": "الكفاءة التشغيلية",
-            "ميزانية": "الكفاءة التشغيلية"
+            "economic": "Economic Impact",
+            "financial": "Economic Impact",
+            "community": "Community Engagement",
+            "visitor": "Community Engagement",
+            "media": "Media Coverage",
+            "communication": "Media Coverage",
+            "legacy": "Legacy and Sustainability",
+            "sustainability": "Legacy and Sustainability",
+            "operation": "Operational Efficiency",
+            "budget": "Operational Efficiency"
         }
 
         specific_category = None
+        message_lower = user_message.lower()
         for keyword, category in category_keywords.items():
-            if keyword in user_message:
+            if keyword in message_lower:
                 specific_category = category
                 break
 
         kpi_context = self._get_kpi_context(specific_category)
-        self._log_thinking(f"تم تحميل مؤشرات الأداء من قاعدة المعرفة")
+        self._log_thinking("Loaded KPIs from knowledge base")
 
-        enhanced_message = f"""طلب المستخدم: {user_message}
+        enhanced_message = f"""User request: {user_message}
 
-مؤشرات الأداء المتاحة:
+Available KPIs:
 {kpi_context}
 
-قدم توصيات مؤشرات أداء مناسبة مع شرح طريقة القياس والمستهدفات المقترحة."""
+Provide appropriate KPI recommendations with explanation of measurement methods and proposed targets."""
 
         messages = self._build_messages(enhanced_message, context, conversation_history)
 
         try:
-            self._log_thinking("جارٍ إعداد توصيات المؤشرات...")
+            self._log_thinking("Preparing KPI recommendations...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -143,7 +144,7 @@ class KPIAgent(BaseAgent):
             )
 
             response_text = response.content[0].text
-            self._log_thinking("تم إعداد توصيات المؤشرات بنجاح")
+            self._log_thinking("KPI recommendations prepared successfully")
 
             metadata = {
                 "model": self.model,
@@ -162,9 +163,9 @@ class KPIAgent(BaseAgent):
             )
 
         except Exception as e:
-            self._log_thinking(f"حدث خطأ: {str(e)}")
+            self._log_thinking(f"Error occurred: {str(e)}")
             return AgentResponse(
-                content=f"عذراً، حدث خطأ: {str(e)}",
+                content=f"Sorry, an error occurred: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,
@@ -174,13 +175,13 @@ class KPIAgent(BaseAgent):
 
     def design_kpi_framework(self, objectives: List[str]) -> AgentResponse:
         """Design a complete KPI framework for given objectives."""
-        request = f"""صمم إطار مؤشرات أداء شامل للأهداف التالية:
+        request = f"""Design a comprehensive KPI framework for the following objectives:
 {chr(10).join(f'- {obj}' for obj in objectives)}
 
-يجب أن يشمل الإطار:
-1. المؤشرات الرئيسية لكل هدف
-2. طرق القياس ومصادر البيانات
-3. المستهدفات المقترحة
-4. آلية المتابعة والتقييم"""
+The framework should include:
+1. Key indicators for each objective
+2. Measurement methods and data sources
+3. Proposed targets
+4. Monitoring and evaluation mechanism"""
 
         return self.invoke(request)

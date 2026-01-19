@@ -1,6 +1,5 @@
 """
 Reporting Agent for Project 1 - Events Oversight
-وكيل إعداد التقارير للمشروع الأول
 
 Compiles results and prepares committee reports.
 """
@@ -10,45 +9,46 @@ from ..base_agent import BaseAgent, AgentResponse
 from utils.knowledge_base import KnowledgeBase
 
 
-REPORTING_SYSTEM_PROMPT = """أنت وكيل إعداد التقارير المتخصص في مشروع الإشراف على تخطيط الفعاليات الوطنية.
+REPORTING_SYSTEM_PROMPT = """You are a Reporting Agent specialized in the National Events Planning Oversight project.
 
-مهامك الرئيسية:
-1. تجميع النتائج والتحليلات من مختلف المصادر
-2. إعداد تقارير دورية للجنة الإشرافية
-3. إعداد ملخصات تنفيذية للقيادة
-4. توثيق التقدم والتحديات والمخاطر
+IMPORTANT: Always respond in English.
 
-الجمهور المستهدف:
-- اللجنة الإشرافية العليا
-- القيادات الحكومية
-- فريق التنسيق والمتابعة
+Your main tasks:
+1. Compile results and analyses from various sources
+2. Prepare periodic reports for the oversight committee
+3. Prepare executive summaries for leadership
+4. Document progress, challenges, and risks
 
-هيكل التقارير:
-1. الملخص التنفيذي (أهم النقاط)
-2. الوضع الحالي (إحصائيات ونسب الإنجاز)
-3. التحديات والمخاطر
-4. الإجراءات المتخذة
-5. الخطوات القادمة
-6. التوصيات
+Target Audience:
+- Senior Oversight Committee
+- Government Leadership
+- Coordination and Follow-up Team
 
-أسلوب الكتابة:
-- موجز ومباشر
-- استخدام الأرقام والنسب
-- تسليط الضوء على النقاط الحرجة
-- توصيات قابلة للتنفيذ"""
+Report Structure:
+1. Executive Summary (key points)
+2. Current Status (statistics and completion rates)
+3. Challenges and Risks
+4. Actions Taken
+5. Next Steps
+6. Recommendations
+
+Writing Style:
+- Concise and direct
+- Use numbers and percentages
+- Highlight critical points
+- Actionable recommendations"""
 
 
 class ReportingAgent(BaseAgent):
     """
     Reporting specialist for Project 1.
-    وكيل إعداد التقارير للمشروع الأول
     """
 
     def __init__(self):
         super().__init__(
-            name="وكيل إعداد التقارير",
+            name="Reporting Agent",
             name_en="Reporting Agent",
-            description="تجميع النتائج وإعداد تقارير اللجان",
+            description="Compile results and prepare committee reports",
             temperature=0.4
         )
         self.knowledge_base = KnowledgeBase()
@@ -69,11 +69,11 @@ class ReportingAgent(BaseAgent):
 
         for event in events:
             # Status
-            status = event.get('status', 'غير محدد')
+            status = event.get('status', 'Unspecified')
             by_status[status] = by_status.get(status, 0) + 1
 
             # Entity
-            entity = event.get('organizing_entity', 'غير محدد')
+            entity = event.get('organizing_entity', 'Unspecified')
             if entity not in by_entity:
                 by_entity[entity] = {'total': 0, 'complete': 0}
             by_entity[entity]['total'] += 1
@@ -100,42 +100,42 @@ class ReportingAgent(BaseAgent):
     ) -> AgentResponse:
         """Prepare reports based on user request."""
         self._clear_thinking()
-        self._log_thinking("جارٍ تجميع البيانات لإعداد التقرير...")
+        self._log_thinking("Compiling data for report preparation...")
 
         # Get status summary
         status = self._get_status_summary()
-        self._log_thinking(f"تم تجميع بيانات {status['total_events']} فعالية")
+        self._log_thinking(f"Compiled data for {status['total_events']} events")
 
         # Format status for context
-        status_text = f"""## ملخص الوضع الحالي
+        status_text = f"""## Current Status Summary
 
-### الإحصائيات العامة:
-- إجمالي الفعاليات: {status['total_events']}
-- الفعاليات المكتملة البيانات: {status['complete_events']}
-- نسبة الاكتمال: {status['completion_rate']}%
+### General Statistics:
+- Total Events: {status['total_events']}
+- Events with Complete Data: {status['complete_events']}
+- Completion Rate: {status['completion_rate']}%
 
-### التوزيع حسب الحالة:
+### Distribution by Status:
 """
         for s, count in status['by_status'].items():
             status_text += f"- {s}: {count}\n"
 
-        status_text += "\n### التوزيع حسب الجهة المنفذة:\n"
+        status_text += "\n### Distribution by Implementing Entity:\n"
         for entity, data in status['by_entity'].items():
             rate = data['complete'] * 100 // data['total'] if data['total'] > 0 else 0
-            status_text += f"- {entity}: {data['total']} فعاليات ({rate}% مكتملة)\n"
+            status_text += f"- {entity}: {data['total']} events ({rate}% complete)\n"
 
         # Build enhanced message
-        enhanced_message = f"""طلب المستخدم: {user_message}
+        enhanced_message = f"""User request: {user_message}
 
-البيانات المتاحة:
+Available data:
 {status_text}
 
-أعد تقريراً مناسباً للجنة الإشرافية بناءً على هذه البيانات وطلب المستخدم."""
+Prepare an appropriate report for the oversight committee based on this data and the user's request."""
 
         messages = self._build_messages(enhanced_message, context, conversation_history)
 
         try:
-            self._log_thinking("جارٍ صياغة التقرير...")
+            self._log_thinking("Drafting report...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -146,7 +146,7 @@ class ReportingAgent(BaseAgent):
             )
 
             response_text = response.content[0].text
-            self._log_thinking("تم إعداد التقرير بنجاح")
+            self._log_thinking("Report prepared successfully")
 
             metadata = {
                 "model": self.model,
@@ -165,9 +165,9 @@ class ReportingAgent(BaseAgent):
             )
 
         except Exception as e:
-            self._log_thinking(f"حدث خطأ: {str(e)}")
+            self._log_thinking(f"Error occurred: {str(e)}")
             return AgentResponse(
-                content=f"عذراً، حدث خطأ أثناء إعداد التقرير: {str(e)}",
+                content=f"Sorry, an error occurred while preparing the report: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,
@@ -176,8 +176,8 @@ class ReportingAgent(BaseAgent):
 
     def prepare_committee_report(self) -> AgentResponse:
         """Prepare a standard committee report."""
-        return self.invoke("أعد تقرير الوضع الحالي للجنة الإشرافية")
+        return self.invoke("Prepare a current status report for the oversight committee")
 
     def prepare_executive_summary(self) -> AgentResponse:
         """Prepare an executive summary."""
-        return self.invoke("أعد ملخصاً تنفيذياً موجزاً للقيادة يتضمن أهم النقاط والتوصيات")
+        return self.invoke("Prepare a concise executive summary for leadership including key points and recommendations")

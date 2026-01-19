@@ -1,6 +1,5 @@
 """
 Critique Agent for Project 2 - Major Celebrations Planning
-وكيل المراجعة والنقد للمشروع الثاني
 
 Reviews outputs and provides constructive feedback.
 """
@@ -9,47 +8,48 @@ from typing import Optional, Dict, List
 from ..base_agent import BaseAgent, AgentResponse
 
 
-CRITIQUE_SYSTEM_PROMPT = """أنت وكيل المراجعة والنقد المتخصص في تقييم المخرجات الاستراتيجية.
+CRITIQUE_SYSTEM_PROMPT = """You are a Critique and Review Agent specialized in evaluating strategic outputs.
 
-دورك:
-1. مراجعة المحتوى بعين ناقدة وبناءة
-2. تحديد نقاط القوة والتميز
-3. اكتشاف الفجوات والنقاط الضعيفة
-4. تقديم اقتراحات محددة للتحسين
-5. التأكد من الاتساق والدقة
+IMPORTANT: Always respond in English.
 
-معايير المراجعة:
-- الاكتمال: هل يغطي المحتوى جميع الجوانب المطلوبة؟
-- الدقة: هل المعلومات صحيحة ومدعومة؟
-- الوضوح: هل الأفكار واضحة ومنظمة؟
-- القابلية للتنفيذ: هل التوصيات عملية وواقعية؟
-- الملاءمة: هل المحتوى مناسب للسياق المحلي؟
+Your role:
+1. Review content with a critical and constructive eye
+2. Identify strengths and areas of excellence
+3. Discover gaps and weaknesses
+4. Provide specific suggestions for improvement
+5. Ensure consistency and accuracy
 
-هيكل المراجعة:
-1. ملخص عام للمحتوى
-2. نقاط القوة (3-5 نقاط)
-3. نقاط التحسين (3-5 نقاط)
-4. اقتراحات محددة
-5. التقييم العام
+Review Criteria:
+- Completeness: Does the content cover all required aspects?
+- Accuracy: Is the information correct and supported?
+- Clarity: Are the ideas clear and organized?
+- Actionability: Are the recommendations practical and realistic?
+- Relevance: Is the content appropriate for the local context?
 
-أسلوب النقد:
-- بناء ومهني
-- محدد وقابل للتنفيذ
-- متوازن بين الإيجابي والسلبي
-- مدعوم بأمثلة"""
+Review Structure:
+1. General summary of content
+2. Strengths (3-5 points)
+3. Areas for Improvement (3-5 points)
+4. Specific suggestions
+5. Overall assessment
+
+Critique Style:
+- Constructive and professional
+- Specific and actionable
+- Balanced between positive and negative
+- Supported with examples"""
 
 
 class CritiqueAgent(BaseAgent):
     """
     Critique specialist for Project 2.
-    وكيل المراجعة والنقد للمشروع الثاني
     """
 
     def __init__(self):
         super().__init__(
-            name="وكيل المراجعة والنقد",
+            name="Critique Agent",
             name_en="Critique Agent",
-            description="مراجعة المخرجات وتقديم ملاحظات بناءة",
+            description="Review outputs and provide constructive feedback",
             temperature=0.4
         )
 
@@ -74,27 +74,27 @@ class CritiqueAgent(BaseAgent):
             AgentResponse with critique
         """
         self._clear_thinking()
-        self._log_thinking("جارٍ مراجعة المحتوى...")
+        self._log_thinking("Reviewing content...")
 
-        review_request = f"""## طلب المراجعة
+        review_request = f"""## Review Request
 
-**المحتوى المطلوب مراجعته:**
+**Content to review:**
 {content_to_review}
 
 """
         if source_agent:
-            review_request += f"**المصدر:** {source_agent}\n"
+            review_request += f"**Source:** {source_agent}\n"
         if original_request:
-            review_request += f"**الطلب الأصلي:** {original_request}\n"
+            review_request += f"**Original Request:** {original_request}\n"
 
         review_request += """
 ---
-قدم مراجعة شاملة تتضمن:
-1. ملخص المحتوى
-2. نقاط القوة
-3. نقاط التحسين
-4. اقتراحات محددة
-5. التقييم العام"""
+Provide a comprehensive review including:
+1. Content summary
+2. Strengths
+3. Areas for improvement
+4. Specific suggestions
+5. Overall assessment"""
 
         return self.invoke(review_request)
 
@@ -106,12 +106,12 @@ class CritiqueAgent(BaseAgent):
     ) -> AgentResponse:
         """Provide critique based on user request."""
         self._clear_thinking()
-        self._log_thinking("جارٍ إعداد المراجعة النقدية...")
+        self._log_thinking("Preparing critical review...")
 
         messages = self._build_messages(user_message, context, conversation_history)
 
         try:
-            self._log_thinking("جارٍ تحليل المحتوى...")
+            self._log_thinking("Analyzing content...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -122,7 +122,7 @@ class CritiqueAgent(BaseAgent):
             )
 
             response_text = response.content[0].text
-            self._log_thinking("تم إعداد المراجعة بنجاح")
+            self._log_thinking("Review prepared successfully")
 
             metadata = {
                 "model": self.model,
@@ -140,9 +140,9 @@ class CritiqueAgent(BaseAgent):
             )
 
         except Exception as e:
-            self._log_thinking(f"حدث خطأ: {str(e)}")
+            self._log_thinking(f"Error occurred: {str(e)}")
             return AgentResponse(
-                content=f"عذراً، حدث خطأ أثناء المراجعة: {str(e)}",
+                content=f"Sorry, an error occurred during review: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,
@@ -152,13 +152,13 @@ class CritiqueAgent(BaseAgent):
 
     def quick_review(self, content: str) -> AgentResponse:
         """Provide a quick review focusing on key points."""
-        request = f"""قدم مراجعة سريعة ومركزة للمحتوى التالي:
+        request = f"""Provide a quick and focused review of the following content:
 
 {content}
 
-ركز على:
-1. أهم 3 نقاط قوة
-2. أهم 3 نقاط تحسين
-3. توصية رئيسية واحدة"""
+Focus on:
+1. Top 3 strengths
+2. Top 3 areas for improvement
+3. One key recommendation"""
 
         return self.invoke(request)
