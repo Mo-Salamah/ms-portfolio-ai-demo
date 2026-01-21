@@ -76,68 +76,57 @@ PROJECT_CARDS = [
 
 
 def render_project_card(card: dict, is_enabled: bool = True):
-    """Render a single project card."""
+    """Render a single project card using native Streamlit components."""
 
-    # Build agents list HTML
-    agents_html = "".join([
-        f'<li style="margin-bottom: 8px;"><strong>{agent["name"]}</strong> - {agent["desc"]}</li>'
-        for agent in card["agents"]
-    ])
+    # Use a container with custom styling
+    with st.container():
+        # Header row with title and status
+        col_title, col_status = st.columns([4, 1])
+        with col_title:
+            st.markdown(f"### {card['title']}")
+        with col_status:
+            status_color = "#10b981" if card["status"] == "Demo" else "#6b7280"
+            st.markdown(f'<span style="background-color: {status_color}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8em; font-weight: 500;">{card["status"]}</span>', unsafe_allow_html=True)
 
-    # Card HTML
-    st.markdown(f"""
-    <div class="project-card" style="{'opacity: 0.7;' if not is_enabled else ''}">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-            <h3 style="margin: 0; color: {THEME['primary']};">{card['icon']} {card['title']}</h3>
-            <span class="status-badge {card['status_class']}">{card['status']}</span>
-        </div>
+        st.markdown("---")
 
-        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;" />
+        # Description
+        st.markdown(f"**Description:**")
+        st.markdown(f"{card['description']}")
 
-        <div style="margin-bottom: 16px;">
-            <strong style="color: #374151;">Description:</strong>
-            <p class="description" style="margin-top: 8px; color: #666; line-height: 1.6; font-size: 0.95em;">
-                {card['description']}
-            </p>
-        </div>
+        st.markdown("---")
 
-        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;" />
+        # Agents list
+        st.markdown("**Available Agents:**")
+        for agent in card["agents"]:
+            st.markdown(f"- **{agent['name']}** - {agent['desc']}")
 
-        <div class="agents-list" style="background-color: #f8f9fa; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;">
-            <strong style="color: #374151;">Available Agents:</strong>
-            <ul style="margin: 12px 0 0 0; padding-left: 20px; color: #555; font-size: 0.9em;">
-                {agents_html}
-            </ul>
-        </div>
+        st.markdown("---")
 
-        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;" />
+        # Point of contact
+        st.markdown(f"**Point of Contact:** {card['poc']}")
 
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <span style="color: #666; font-size: 0.85em;"><strong>Point of Contact:</strong> {card['poc']}</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        # Spacer
+        st.markdown("")
 
-    # Only show button for enabled projects
-    if is_enabled and card["status"] == "Demo":
-        if st.button(
-            f"Open Project",
-            key=f"btn_{card['id']}",
-            use_container_width=True,
-            type="primary"
-        ):
-            st.session_state.selected_project = card['id']
-            st.session_state.current_page = "workspace"
-            st.rerun()
-    elif not is_enabled or card["status"] != "Demo":
-        st.button(
-            "Coming Soon",
-            key=f"btn_{card['id']}",
-            use_container_width=True,
-            disabled=True
-        )
+        # Only show button for enabled projects
+        if is_enabled and card["status"] == "Demo":
+            if st.button(
+                f"Open Project",
+                key=f"btn_{card['id']}",
+                use_container_width=True,
+                type="primary"
+            ):
+                st.session_state.selected_project = card['id']
+                st.session_state.current_page = "workspace"
+                st.rerun()
+        elif not is_enabled or card["status"] != "Demo":
+            st.button(
+                "Coming Soon",
+                key=f"btn_{card['id']}",
+                use_container_width=True,
+                disabled=True
+            )
 
 
 def render_project_select_page():
