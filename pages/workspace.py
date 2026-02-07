@@ -60,7 +60,7 @@ def render_workspace_header():
 
     with col2:
         st.markdown(f"""
-        <div style="text-align: center;">
+        <div style="text-align: right; direction: rtl;">
             <h2 style="color: {THEME['primary']}; margin-bottom: 4px;">
                 {project_info['name']}
             </h2>

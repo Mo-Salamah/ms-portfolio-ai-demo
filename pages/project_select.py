@@ -99,8 +99,8 @@ def render_use_case_card(case: dict):
 def render_project_select_page():
     """Render the project selection page."""
 
-    # Sign out button
-    col_signout, col_spacer = st.columns([1, 5])
+    # Sign out button (left side in RTL layout)
+    col_spacer, col_signout = st.columns([5, 1])
     with col_signout:
         if st.button("تسجيل الخروج", key="logout_btn"):
             st.session_state.authenticated = False
@@ -109,9 +109,9 @@ def render_project_select_page():
 
     # Header section
     st.markdown(f"""
-    <div style="text-align: center; padding: 20px 0 30px 0; direction: rtl;">
+    <div style="text-align: right; padding: 20px 0 30px 0; direction: rtl;">
         <h1 style="color: {THEME['primary']}; margin-bottom: 16px;">منصة الذكاء الاصطناعي للمحفظة (أ)</h1>
-        <p style="color: #666; max-width: 800px; margin: 0 auto; line-height: 1.7; font-size: 1.05em; font-family: 'Noto Sans Arabic', sans-serif;">
+        <p style="color: #666; line-height: 1.7; font-size: 1.05em; font-family: 'Noto Sans Arabic', sans-serif;">
             منصة ذكاء اصطناعي متعددة الوكلاء ("Multi-Agent System") مصممة لدعم فرق العمل
             في المحفظة من خلال وكلاء متخصصين يقومون بالبحث وتحليل البيانات وإعداد التقارير
             والتوصيات الاستراتيجية.

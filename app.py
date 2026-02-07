@@ -54,14 +54,34 @@ GLOBAL_CSS = f"""
     }}
 
     /* Headers */
-    h1, h2, h3 {{
+    h1, h2, h3, h4, h5, h6 {{
         color: {THEME['primary']};
         font-family: 'Noto Sans Arabic', sans-serif;
+        text-align: right !important;
+        direction: rtl !important;
     }}
 
     h1 {{
         border-bottom: 3px solid {THEME['accent']};
         padding-bottom: 10px;
+    }}
+
+    /* Force all Streamlit markdown/text elements to RTL right-align */
+    .stMarkdown, .stMarkdown p, .stMarkdown div, .stMarkdown li,
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4 {{
+        text-align: right !important;
+        direction: rtl !important;
+    }}
+
+    /* Columns should also be RTL */
+    [data-testid="stHorizontalBlock"] {{
+        direction: rtl;
+    }}
+
+    /* Buttons text alignment */
+    .stButton > button {{
+        text-align: right;
+        direction: rtl;
     }}
 
     /* Chat messages */
