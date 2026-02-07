@@ -18,7 +18,7 @@ showErrorDetails = true
 toolbarMode = "minimal"
 
 [runner]
-fastReruns = true
+fastReruns = false
 
 [auth]
 enabled = false

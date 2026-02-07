@@ -320,12 +320,6 @@ def process_user_message(prompt: str, messages_key: str):
     """Process a user message and generate response."""
     project_id = st.session_state.get('selected_project', 'project1')
 
-    # Add user message to history
-    st.session_state[messages_key].append({
-        "role": "user",
-        "content": prompt
-    })
-
     # Build context with uploaded CSV data
     context = {}
     csv_data = st.session_state.get('uploaded_csv_data', {}).get(project_id, {})
@@ -372,29 +366,80 @@ def render_chat_interface():
     """Render the main chat interface."""
     project_id = st.session_state.get('selected_project', 'project1')
     messages_key = f"messages_{project_id}"
+    pending_key = f"pending_message_{project_id}"
+    processing_key = f"processing_{project_id}"
 
     # Initialize messages if needed
     if messages_key not in st.session_state:
         st.session_state[messages_key] = []
 
-    # Check for pending message
-    pending_key = f"pending_message_{project_id}"
-    if pending_key in st.session_state and st.session_state[pending_key]:
-        prompt = st.session_state[pending_key]
-        st.session_state[pending_key] = None
-
-        with st.spinner("جارٍ المعالجة..."):
-            process_user_message(prompt, messages_key)
-
-    # Show welcome message if no messages
+    # Display chat history first (so user sees existing messages immediately)
     if not st.session_state[messages_key]:
         render_welcome_message()
+    else:
+        for i, message in enumerate(st.session_state[messages_key]):
+            render_chat_message(message, i)
 
-    # Display chat history
-    for i, message in enumerate(st.session_state[messages_key]):
-        render_chat_message(message, i)
+    # Check for pending message — process AFTER displaying history
+    if pending_key in st.session_state and st.session_state[pending_key]:
+        prompt = st.session_state[pending_key]
+        # Clear pending ONLY after we capture it, and mark as processing
+        st.session_state[pending_key] = None
+        st.session_state[processing_key] = True
 
-    # Chat input
+        # Add user message to history and display it
+        st.session_state[messages_key].append({
+            "role": "user",
+            "content": prompt
+        })
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Show assistant response with spinner
+        with st.chat_message("assistant"):
+            with st.spinner("جارٍ المعالجة..."):
+                process_user_message(prompt, messages_key)
+
+            # Display the response that was just added
+            if st.session_state[messages_key] and st.session_state[messages_key][-1]["role"] == "assistant":
+                last_msg = st.session_state[messages_key][-1]
+                st.markdown(last_msg["content"])
+
+                if (st.session_state.get('show_thinking', True) and last_msg.get("thinking")):
+                    with st.expander("تفكير الوكيل", expanded=False):
+                        st.markdown(f"""
+                        <div style="
+                            background-color: #f8f9fa;
+                            padding: 12px;
+                            border-radius: 8px;
+                            border-right: 4px solid {THEME['accent']};
+                            margin: 8px 0;
+                            white-space: pre-wrap;
+                            color: #333;
+                            font-size: 0.9em;
+                            direction: rtl;
+                            text-align: right;
+                        ">
+                        {last_msg['thinking'].replace(chr(10), '<br/>')}
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                if last_msg.get("agent"):
+                    st.markdown(f"""
+                    <span style="
+                        background-color: {THEME['primary']};
+                        color: white;
+                        padding: 4px 12px;
+                        border-radius: 16px;
+                        font-size: 12px;
+                        display: inline-block;
+                        margin-top: 8px;
+                    ">{last_msg['agent']}</span>
+                    """, unsafe_allow_html=True)
+
+        st.session_state[processing_key] = False
+
+    # Chat input — always at the bottom
     if prompt := st.chat_input("اكتب رسالتك هنا..."):
         st.session_state[pending_key] = prompt
         st.rerun()

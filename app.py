@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="منصة الذكاء الاصطناعي للمحفظة (أ)",
     page_icon="",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="auto"
 )
 
 # Global CSS for Arabic RTL layout
@@ -406,11 +406,6 @@ GLOBAL_CSS = f"""
         direction: rtl;
         text-align: right;
         font-family: 'Noto Sans Arabic', sans-serif;
-    }}
-
-    /* Hide sidebar collapse/expand control (arrow button) */
-    [data-testid="stSidebarCollapsedControl"] {{
-        display: none !important;
     }}
 
     /* Hide the sidebar nav separator */
