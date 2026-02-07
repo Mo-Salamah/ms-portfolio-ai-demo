@@ -30,7 +30,7 @@ GLOBAL_CSS = f"""
     .main .block-container {{
         direction: rtl;
         text-align: right;
-        padding-top: 100px;
+        padding-top: 80px;
     }}
 
     /* Sidebar - RTL */
@@ -157,29 +157,10 @@ GLOBAL_CSS = f"""
         margin-bottom: 12px;
     }}
 
-    /* Prototype banner */
-    .prototype-banner {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 32px;
-        background-color: #dc2626;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 99999;
-        color: white;
-        font-family: 'Noto Sans Arabic', sans-serif;
-        font-size: 0.85em;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-    }}
-
     /* Global header bar */
     .global-header {{
         position: fixed;
-        top: 32px;
+        top: 0;
         left: 0;
         right: 0;
         height: 60px;
@@ -365,17 +346,69 @@ GLOBAL_CSS = f"""
         direction: rtl;
         text-align: right;
     }}
+
+    /* Override Streamlit English text with Arabic */
+    /* File uploader: "Drag and drop file here" → Arabic */
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] span:first-child {{
+        font-size: 0 !important;
+    }}
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] span:first-child::after {{
+        content: "اسحب الملفات وأفلتها هنا" !important;
+        font-size: 0.9rem !important;
+        font-family: 'Noto Sans Arabic', sans-serif !important;
+    }}
+
+    /* File uploader: "Browse files" button → Arabic */
+    [data-testid="stFileUploaderDropzone"] button {{
+        font-size: 0 !important;
+    }}
+    [data-testid="stFileUploaderDropzone"] button::after {{
+        content: "تصفح الملفات" !important;
+        font-size: 0.85rem !important;
+        font-family: 'Noto Sans Arabic', sans-serif !important;
+    }}
+
+    /* File uploader: "Limit XMB per file" → Arabic */
+    [data-testid="stFileUploader"] small {{
+        font-size: 0 !important;
+    }}
+    [data-testid="stFileUploader"] small::after {{
+        content: "ملفات CSV فقط" !important;
+        font-size: 0.75rem !important;
+        color: #999 !important;
+        font-family: 'Noto Sans Arabic', sans-serif !important;
+    }}
+
+    /* Override Streamlit's "Running..." spinner text */
+    .stSpinner > div {{
+        direction: rtl;
+        font-family: 'Noto Sans Arabic', sans-serif;
+    }}
+
+    /* Tabs RTL */
+    .stTabs {{
+        direction: rtl;
+    }}
+
+    /* Metric RTL */
+    [data-testid="stMetric"] {{
+        direction: rtl;
+        text-align: right;
+    }}
+
+    /* Make "Manage app" button hidden */
+    .stDeployButton {{
+        display: none !important;
+    }}
+
+    /* Override Streamlit toast/notification text */
+    .stToast {{
+        direction: rtl;
+        text-align: right;
+        font-family: 'Noto Sans Arabic', sans-serif;
+    }}
 </style>
 """
-
-
-def render_prototype_banner():
-    """Render the prototype banner at the very top of the page."""
-    st.markdown("""
-    <div class="prototype-banner">
-        نسخة أولية
-    </div>
-    """, unsafe_allow_html=True)
 
 
 def render_global_header(show_signout: bool = True):
@@ -420,9 +453,6 @@ def main():
     """Main application function with page routing."""
     # Apply global CSS
     st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
-
-    # Always show prototype banner
-    render_prototype_banner()
 
     # Initialize session state
     initialize_session_state()

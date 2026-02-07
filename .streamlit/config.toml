@@ -19,3 +19,6 @@ toolbarMode = "minimal"
 
 [runner]
 fastReruns = true
+
+[auth]
+enabled = false

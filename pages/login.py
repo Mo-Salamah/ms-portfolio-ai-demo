@@ -3,24 +3,46 @@
 """
 
 import csv
+import os
 import streamlit as st
 from pathlib import Path
 from config import THEME
 
 
-# Path to users CSV file
-USERS_CSV_PATH = Path(__file__).parent.parent / "users.csv"
+def _get_users_csv_path() -> Path:
+    """Get the path to users.csv, trying multiple possible locations."""
+    # Try relative to this file
+    path1 = Path(__file__).parent.parent / "users.csv"
+    if path1.exists():
+        return path1
+
+    # Try relative to current working directory
+    path2 = Path(os.getcwd()) / "users.csv"
+    if path2.exists():
+        return path2
+
+    # Try relative to app root (Streamlit Cloud uses /app or /mount/src)
+    for root in ["/app", "/mount/src", "/home/appuser"]:
+        for dirpath, dirnames, filenames in os.walk(root):
+            if "users.csv" in filenames:
+                return Path(dirpath) / "users.csv"
+
+    return path1  # fallback
 
 
 def authenticate_user(username: str, password: str) -> bool:
-    """Authenticate user against users.csv file."""
+    """Authenticate user against users.csv file. Returns False if file not found or credentials invalid."""
+    users_path = _get_users_csv_path()
     try:
-        with open(USERS_CSV_PATH, "r", encoding="utf-8") as f:
+        with open(users_path, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row["username"].strip() == username and row["password"].strip() == password:
                     return True
     except FileNotFoundError:
+        # CSV file not found — do NOT allow login
+        return False
+    except Exception:
         return False
     return False
 
