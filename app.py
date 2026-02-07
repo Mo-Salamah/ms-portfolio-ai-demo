@@ -1,8 +1,5 @@
 """
-MS Portfolio AI Agent Demo - Main Application Entry Point
-
-A multi-agent AI system for strategic planning with English interface.
-Supports multiple projects with distinct agent workflows.
+مكتب شؤون المهمات والمبادرات — منصة الذكاء الاصطناعي للمحفظة (أ)
 """
 
 import streamlit as st
@@ -10,39 +7,39 @@ from config import THEME
 
 # Page configuration - must be first Streamlit command
 st.set_page_config(
-    page_title="Strategic AI Platform",
+    page_title="منصة الذكاء الاصطناعي للمحفظة (أ)",
     page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Global CSS for English LTR layout with green header
+# Global CSS for Arabic RTL layout
 GLOBAL_CSS = f"""
 <style>
     /* Import fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 
-    /* LTR Layout */
+    /* RTL Layout */
     .stApp {{
-        direction: ltr;
-        text-align: left;
-        font-family: 'Inter', sans-serif;
+        direction: rtl;
+        text-align: right;
+        font-family: 'Noto Sans Arabic', sans-serif;
     }}
 
     /* Main content area */
     .main .block-container {{
-        direction: ltr;
-        text-align: left;
-        padding-top: 80px;  /* Space for header */
+        direction: rtl;
+        text-align: right;
+        padding-top: 100px;
     }}
 
-    /* Sidebar - Light theme */
+    /* Sidebar - RTL */
     [data-testid="stSidebar"] {{
-        direction: ltr;
-        text-align: left;
+        direction: rtl;
+        text-align: right;
         background-color: #f8f9fa;
-        border-right: 1px solid #e5e7eb;
+        border-left: 1px solid #e5e7eb;
+        border-right: none;
     }}
 
     [data-testid="stSidebar"] .stMarkdown {{
@@ -59,7 +56,7 @@ GLOBAL_CSS = f"""
     /* Headers */
     h1, h2, h3 {{
         color: {THEME['primary']};
-        font-family: 'Inter', sans-serif;
+        font-family: 'Noto Sans Arabic', sans-serif;
     }}
 
     h1 {{
@@ -69,51 +66,51 @@ GLOBAL_CSS = f"""
 
     /* Chat messages */
     .stChatMessage {{
-        direction: ltr;
-        text-align: left;
-        font-family: 'Inter', sans-serif;
+        direction: rtl;
+        text-align: right;
+        font-family: 'Noto Sans Arabic', sans-serif;
     }}
 
     /* Input field */
     .stChatInput textarea {{
-        direction: ltr;
-        text-align: left;
-        font-family: 'Inter', sans-serif;
+        direction: rtl;
+        text-align: right;
+        font-family: 'Noto Sans Arabic', sans-serif;
     }}
 
     /* Text inputs */
     .stTextInput input {{
-        direction: ltr;
-        text-align: left;
-        font-family: 'Inter', sans-serif;
+        direction: rtl;
+        text-align: right;
+        font-family: 'Noto Sans Arabic', sans-serif;
     }}
 
-    /* Expander for thinking */
+    /* Expander */
     .streamlit-expanderHeader {{
-        direction: ltr;
-        text-align: left;
-        font-family: 'Inter', sans-serif;
+        direction: rtl;
+        text-align: right;
+        font-family: 'Noto Sans Arabic', sans-serif;
     }}
 
     .streamlit-expanderContent {{
-        direction: ltr;
-        text-align: left;
+        direction: rtl;
+        text-align: right;
     }}
 
     /* Buttons */
     .stButton button {{
-        font-family: 'Inter', sans-serif;
+        font-family: 'Noto Sans Arabic', sans-serif;
     }}
 
     /* Select boxes */
     .stSelectbox {{
-        direction: ltr;
+        direction: rtl;
     }}
 
     /* Info boxes */
     .stAlert {{
-        direction: ltr;
-        text-align: left;
+        direction: rtl;
+        text-align: right;
     }}
 
     /* Agent badge styling */
@@ -127,7 +124,7 @@ GLOBAL_CSS = f"""
         margin-top: 8px;
     }}
 
-    /* Gold accent for important elements */
+    /* Gold accent */
     .gold-accent {{
         color: {THEME['accent']};
         font-weight: bold;
@@ -138,7 +135,8 @@ GLOBAL_CSS = f"""
         background-color: #f8f9fa;
         padding: 12px;
         border-radius: 8px;
-        border-left: 4px solid {THEME['accent']};
+        border-right: 4px solid {THEME['accent']};
+        border-left: none;
         margin: 8px 0;
         color: #333;
     }}
@@ -150,6 +148,8 @@ GLOBAL_CSS = f"""
         padding: 24px;
         border-radius: 12px;
         margin-bottom: 20px;
+        direction: rtl;
+        text-align: right;
     }}
 
     .welcome-box h2 {{
@@ -157,21 +157,29 @@ GLOBAL_CSS = f"""
         margin-bottom: 12px;
     }}
 
-    /* Demo mode badge */
-    .demo-badge {{
-        background-color: #f59e0b;
-        color: #1a1a1a;
-        padding: 6px 16px;
-        border-radius: 20px;
+    /* Prototype banner */
+    .prototype-banner {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 32px;
+        background-color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        color: white;
+        font-family: 'Noto Sans Arabic', sans-serif;
         font-size: 0.85em;
-        font-weight: bold;
-        display: inline-block;
+        font-weight: 600;
+        letter-spacing: 0.5px;
     }}
 
     /* Global header bar */
     .global-header {{
         position: fixed;
-        top: 0;
+        top: 32px;
         left: 0;
         right: 0;
         height: 60px;
@@ -182,15 +190,16 @@ GLOBAL_CSS = f"""
         padding: 0 24px;
         z-index: 9999;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        direction: rtl;
     }}
 
-    .header-left {{
+    .header-right {{
         display: flex;
         align-items: center;
         gap: 16px;
     }}
 
-    .header-right {{
+    .header-left {{
         display: flex;
         align-items: center;
     }}
@@ -205,12 +214,13 @@ GLOBAL_CSS = f"""
         justify-content: center;
         color: white;
         font-weight: bold;
+        font-size: 0.8em;
     }}
 
     .header-entity {{
         color: white;
         font-family: 'Noto Sans Arabic', sans-serif;
-        font-size: 1.1em;
+        font-size: 1.05em;
         font-weight: 500;
         direction: rtl;
     }}
@@ -223,6 +233,7 @@ GLOBAL_CSS = f"""
         border-radius: 6px;
         cursor: pointer;
         font-size: 0.9em;
+        font-family: 'Noto Sans Arabic', sans-serif;
         transition: background-color 0.2s;
     }}
 
@@ -230,7 +241,7 @@ GLOBAL_CSS = f"""
         background-color: rgba(255,255,255,0.2);
     }}
 
-    /* Hide Streamlit branding for cleaner look */
+    /* Hide Streamlit branding */
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
 
@@ -261,6 +272,8 @@ GLOBAL_CSS = f"""
         margin-bottom: 16px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         transition: box-shadow 0.2s, border-color 0.2s;
+        direction: rtl;
+        text-align: right;
     }}
 
     .project-card:hover {{
@@ -295,7 +308,7 @@ GLOBAL_CSS = f"""
         font-weight: 500;
     }}
 
-    .status-demo {{
+    .status-active {{
         background-color: #10b981;
         color: white;
     }}
@@ -305,7 +318,7 @@ GLOBAL_CSS = f"""
         color: white;
     }}
 
-    /* Strategic control section - gold background */
+    /* Strategic control section */
     .strategic-control {{
         background-color: #fef3c7;
         border: 1px solid {THEME['accent']};
@@ -316,27 +329,64 @@ GLOBAL_CSS = f"""
     .strategic-control h4 {{
         color: #92400e;
     }}
+
+    /* Info dashboard */
+    .info-dashboard {{
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 16px;
+        direction: rtl;
+        text-align: right;
+    }}
+
+    .info-dashboard h4 {{
+        color: {THEME['primary']};
+        margin-bottom: 8px;
+        font-size: 0.95em;
+    }}
+
+    .info-dashboard-item {{
+        background-color: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+    }}
+
+    /* File uploader RTL */
+    .stFileUploader {{
+        direction: rtl;
+    }}
+
+    /* Upload area text */
+    [data-testid="stFileUploader"] {{
+        direction: rtl;
+        text-align: right;
+    }}
 </style>
 """
 
 
-def render_global_header(show_signout: bool = True):
-    """Render the global header bar that appears on all pages."""
-    signout_html = ""
-    if show_signout:
-        signout_html = """
-        <form action="" method="post" style="margin: 0;">
-            <button type="submit" class="signout-btn" name="signout">Sign Out</button>
-        </form>
-        """
+def render_prototype_banner():
+    """Render the prototype banner at the very top of the page."""
+    st.markdown("""
+    <div class="prototype-banner">
+        نسخة أولية
+    </div>
+    """, unsafe_allow_html=True)
 
+
+def render_global_header(show_signout: bool = True):
+    """Render the global header bar."""
     st.markdown(f"""
     <div class="global-header">
-        <div class="header-left">
-            <div class="header-logo">AI</div>
-        </div>
         <div class="header-right">
-            <span class="header-entity">مكتب المهمات الاستشارية</span>
+            <div class="header-logo">AI</div>
+            <span class="header-entity">مكتب شؤون المهمات والمبادرات — منصة الذكاء الاصطناعي للمحفظة (أ)</span>
+        </div>
+        <div class="header-left">
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -359,36 +409,41 @@ def initialize_session_state():
     if "active_agent_id" not in st.session_state:
         st.session_state.active_agent_id = None
 
+    if "uploaded_csv_data" not in st.session_state:
+        st.session_state.uploaded_csv_data = {}
+
+    if "uploaded_csv_names" not in st.session_state:
+        st.session_state.uploaded_csv_names = {}
+
 
 def main():
     """Main application function with page routing."""
     # Apply global CSS
     st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
+    # Always show prototype banner
+    render_prototype_banner()
+
     # Initialize session state
     initialize_session_state()
 
     # Page routing
     if not st.session_state.authenticated:
-        # Show login page (no header signout on login)
         render_global_header(show_signout=False)
         from pages.login import render_login_page
         render_login_page()
 
     elif st.session_state.current_page == "project_select" or st.session_state.selected_project is None:
-        # Show project selection page
         render_global_header(show_signout=True)
         from pages.project_select import render_project_select_page
         render_project_select_page()
 
     elif st.session_state.current_page == "workspace":
-        # Show main workspace
         render_global_header(show_signout=True)
         from pages.workspace import render_workspace_page
         render_workspace_page()
 
     else:
-        # Default to project selection
         render_global_header(show_signout=True)
         from pages.project_select import render_project_select_page
         render_project_select_page()

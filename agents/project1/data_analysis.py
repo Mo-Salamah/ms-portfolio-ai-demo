@@ -1,7 +1,5 @@
 """
-Data Analysis Agent for Project 1 - Events Oversight
-
-Analyzes event data and produces analytical reports.
+وكيل تحليل البيانات — لجنة الفعاليات
 """
 
 from typing import Optional, Dict, List
@@ -9,44 +7,49 @@ from ..base_agent import BaseAgent, AgentResponse
 from utils.knowledge_base import KnowledgeBase
 
 
-DATA_ANALYSIS_SYSTEM_PROMPT = """You are a Data Analysis Agent specialized in the National Events Planning Oversight project.
+DATA_ANALYSIS_SYSTEM_PROMPT = """أنت وكيل تحليل البيانات المتخصص في نظام لجنة الفعاليات.
 
-IMPORTANT: Always respond in English.
+مهامك الرئيسية:
+١. تحليل بيانات الفعاليات المستلمة من هيئات التطوير
+٢. إنتاج تقارير تحليلية وإحصائية
+٣. تحديد الأنماط والتوزيعات في البيانات
+٤. تقديم رؤى قابلة للتنفيذ
 
-Your main tasks:
-1. Analyze event data received from implementing entities
-2. Produce analytical and statistical reports
-3. Identify patterns and distributions in the data
-4. Provide actionable insights
+هيئات التطوير:
+- هيئة التطوير (أ)
+- هيئة التطوير (ب)
+- هيئة التطوير (ج)
 
-Implementing Entities:
-- Implementing Entity A
-- Implementing Entity B
-- Implementing Entity C
+أسلوب التحليل:
+- استخدم الجداول للمقارنات
+- قدم الأرقام والنسب المئوية
+- صنف الفعاليات حسب النوع والجهة والمدينة
+- حدد الفجوات في البيانات
 
-Analysis Style:
-- Use tables for comparisons
-- Provide numbers and percentages
-- Categorize events by type, entity, and city
-- Identify data gaps
+أسلوب الرد:
+- عربي فصيح مؤسسي
+- مختصر ومباشر — لا مقدمات طويلة
+- لا تستخدم عبارات مثل "بالتأكيد" أو "سعيد بمساعدتك"
+- تعامل مع المستخدم كمسؤول رفيع المستوى
+- استخدم البيانات الفعلية فقط — لا تخترع أرقاماً
+- إذا لم تتوفر معلومة، قل ذلك صراحة
+- لا تستخدم رموز تعبيرية مطلقاً
 
-Output Format:
-- Clear headings
-- Organized tables
-- Executive summary at the beginning
-- Recommendations at the end"""
+شكل المخرجات:
+- عناوين واضحة
+- جداول منظمة
+- ملخص تنفيذي في البداية
+- توصيات في النهاية"""
 
 
 class DataAnalysisAgent(BaseAgent):
-    """
-    Data Analysis specialist for Project 1.
-    """
+    """وكيل تحليل البيانات — متخصص في تحليل بيانات الفعاليات"""
 
     def __init__(self):
         super().__init__(
-            name="Data Analysis Agent",
-            name_en="Data Analysis Agent",
-            description="Analyze event data and produce analytical reports",
+            name="وكيل تحليل البيانات",
+            name_en="وكيل تحليل البيانات",
+            description="تحليل بيانات الفعاليات وإنتاج التقارير التحليلية",
             temperature=0.3
         )
         self.knowledge_base = KnowledgeBase()
@@ -58,7 +61,6 @@ class DataAnalysisAgent(BaseAgent):
         """Get a summary of events data for analysis."""
         events = self.knowledge_base.get_all_events()
 
-        # Calculate statistics
         total = len(events)
         by_entity = {}
         by_type = {}
@@ -66,76 +68,79 @@ class DataAnalysisAgent(BaseAgent):
         by_tier = {}
         incomplete = []
 
+        # Entity name mapping
+        entity_map = {
+            "Implementing Entity A": "هيئة التطوير (أ)",
+            "Implementing Entity B": "هيئة التطوير (ب)",
+            "Implementing Entity C": "هيئة التطوير (ج)",
+        }
+
         for event in events:
-            # By organizing entity
-            entity = event.get('organizing_entity', 'Unspecified')
+            entity_raw = event.get('organizing_entity', 'غير محدد')
+            entity = entity_map.get(entity_raw, entity_raw)
             by_entity[entity] = by_entity.get(entity, 0) + 1
 
-            # By type
-            event_type = event.get('type', 'Unspecified')
+            event_type = event.get('type', 'غير محدد')
             by_type[event_type] = by_type.get(event_type, 0) + 1
 
-            # By city
-            city = event.get('city', 'Unspecified')
+            city = event.get('city', 'غير محدد')
             by_city[city] = by_city.get(city, 0) + 1
 
-            # By tier
-            tier = event.get('tier', 'Unspecified')
+            tier = event.get('tier', 'غير محدد')
             by_tier[tier] = by_tier.get(tier, 0) + 1
 
-            # Check for incomplete data
             required_fields = ['name', 'date', 'city', 'venue', 'organizing_entity']
             missing = [f for f in required_fields if not event.get(f)]
             if missing or event.get('status') == 'In Planning':
                 incomplete.append({
-                    'name': event.get('name', 'Unnamed'),
+                    'name': event.get('name', 'بدون اسم'),
                     'entity': entity,
                     'missing': missing
                 })
 
-        summary = f"""## Events Data Summary
+        summary = f"""## ملخص بيانات الفعاليات
 
-### Total: {total} events
+### الإجمالي: {total} فعالية
 
-### Distribution by Implementing Entity:
-| Entity | Count | Percentage |
-|--------|-------|------------|
+### التوزيع حسب هيئة التطوير:
+| الجهة | العدد | النسبة |
+|-------|-------|--------|
 """
         for entity, count in sorted(by_entity.items(), key=lambda x: x[1], reverse=True):
             summary += f"| {entity} | {count} | {count*100//total}% |\n"
 
         summary += f"""
-### Distribution by Event Type:
-| Type | Count |
-|------|-------|
+### التوزيع حسب النوع:
+| النوع | العدد |
+|-------|-------|
 """
         for event_type, count in sorted(by_type.items(), key=lambda x: x[1], reverse=True):
             summary += f"| {event_type} | {count} |\n"
 
         summary += f"""
-### Distribution by City:
-| City | Count |
-|------|-------|
+### التوزيع حسب المدينة:
+| المدينة | العدد |
+|---------|-------|
 """
         for city, count in sorted(by_city.items(), key=lambda x: x[1], reverse=True):
             summary += f"| {city} | {count} |\n"
 
         summary += f"""
-### Distribution by Tier:
-| Tier | Count |
-|------|-------|
+### التوزيع حسب التصنيف:
+| التصنيف | العدد |
+|---------|-------|
 """
         for tier, count in sorted(by_tier.items(), key=lambda x: x[1], reverse=True):
             summary += f"| {tier} | {count} |\n"
 
         if incomplete:
             summary += f"""
-### Events Requiring Completion ({len(incomplete)}):
+### فعاليات تحتاج استكمال ({len(incomplete)}):
 """
             for item in incomplete[:10]:
                 summary += f"- **{item['name']}** ({item['entity']})"
                 if item['missing']:
-                    summary += f" - Missing: {', '.join(item['missing'])}"
+                    summary += f" — حقول ناقصة: {', '.join(item['missing'])}"
                 summary += "\n"
 
         return summary
@@ -148,24 +153,32 @@ class DataAnalysisAgent(BaseAgent):
     ) -> AgentResponse:
         """Analyze event data and produce reports."""
         self._clear_thinking()
-        self._log_thinking("Analyzing event data...")
+        self._log_thinking("تحليل بيانات الفعاليات...")
 
-        # Get events summary
+        # Get events summary from knowledge base
         events_summary = self._get_events_summary()
-        self._log_thinking("Data analysis complete - events summary prepared")
+        self._log_thinking("اكتمل تحليل البيانات — الملخص جاهز")
 
         # Build context with data
-        enhanced_message = f"""User request: {user_message}
+        enhanced_message = f"""طلب المستخدم: {user_message}
 
-Available data for analysis:
-{events_summary}
+البيانات المتاحة للتحليل:
+{events_summary}"""
 
-Provide a comprehensive analysis based on this data and the user's request."""
+        # Include uploaded CSV data if available
+        if context and context.get('uploaded_data'):
+            enhanced_message += f"""
+
+بيانات إضافية محمّلة:
+{context['uploaded_data']}"""
+            self._log_thinking("تم تضمين بيانات CSV المحمّلة في التحليل")
+
+        enhanced_message += "\n\nقدم تحليلاً شاملاً بناءً على هذه البيانات وطلب المستخدم."
 
         messages = self._build_messages(enhanced_message, context, conversation_history)
 
         try:
-            self._log_thinking("Preparing analytical report...")
+            self._log_thinking("إعداد التقرير التحليلي...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -176,7 +189,7 @@ Provide a comprehensive analysis based on this data and the user's request."""
             )
 
             response_text = response.content[0].text
-            self._log_thinking("Analytical report prepared successfully")
+            self._log_thinking("اكتمل إعداد التقرير التحليلي")
 
             metadata = {
                 "model": self.model,
@@ -194,9 +207,9 @@ Provide a comprehensive analysis based on this data and the user's request."""
             )
 
         except Exception as e:
-            self._log_thinking(f"Error occurred: {str(e)}")
+            self._log_thinking(f"حدث خطأ: {str(e)}")
             return AgentResponse(
-                content=f"Sorry, an error occurred during analysis: {str(e)}",
+                content=f"حدث خطأ أثناء التحليل: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,

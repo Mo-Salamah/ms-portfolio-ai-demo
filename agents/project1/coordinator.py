@@ -1,8 +1,5 @@
 """
-Coordinator Agent for Project 1 - Events Oversight
-Coordination (Agent) - Main orchestrator for the Events Oversight project
-
-This is the orchestrator for Project 1, routing requests to specialist agents.
+وكيل التنسيق — لجنة الفعاليات
 """
 
 from typing import Optional, Dict, List, Tuple
@@ -10,52 +7,52 @@ from ..base_agent import BaseAgent, AgentResponse
 from config import INTENT_KEYWORDS
 
 
-COORDINATOR_SYSTEM_PROMPT = """You are the Coordination (Agent) for the National Events Planning Oversight project.
+COORDINATOR_SYSTEM_PROMPT = """أنت وكيل التنسيق في نظام لجنة الفعاليات.
 
-Your role:
-- Route requests to appropriate specialist agents
-- Summarize results and coordinate between agents
-- Ensure information completeness and quality
+دورك:
+- توجيه الطلبات للوكلاء المتخصصين المناسبين
+- تلخيص النتائج والتنسيق بين الوكلاء
+- ضمان اكتمال المعلومات وجودتها
 
-Available Agents:
-1. Data Analysis (Agent) - Analyzes event data and produces statistical reports
-2. Follow-up & Communication (Agent) - Identifies missing information and drafts follow-up messages
-3. Reporting (Agent) - Compiles results and prepares committee reports
-4. Quality Assurance (Agent) - Verifies data completeness and quality
+الوكلاء المتاحون:
+١. وكيل تحليل البيانات — يحلل بيانات الفعاليات وينتج تقارير إحصائية
+٢. وكيل المتابعة والتواصل — يحدد المعلومات الناقصة ويصيغ رسائل المتابعة
+٣. وكيل إعداد التقارير — يجمّع النتائج ويعد تقارير اللجان
+٤. وكيل فحص الجودة — يتحقق من اكتمال البيانات وجودتها
 
-Context:
-- Deadline: Oversight Committee meeting - September 1, 2027
-- Three main implementing entities: Implementing Entity A, Entity B, Entity C
-- Goal: Ensure information readiness for oversight committees
+السياق:
+- الموعد النهائي: اجتماع اللجنة الإشرافية — ١ سبتمبر ٢٠٢٧
+- ثلاث هيئات تطوير رئيسية: هيئة التطوير (أ) وهيئة التطوير (ب) وهيئة التطوير (ج)
+- الهدف: ضمان جاهزية المعلومات للجان الإشرافية
 
-Response Style:
-- Use professional English
-- Be concise and professional
-- Clearly identify the appropriate agent
-- Provide a summary of actions taken
+أسلوب الرد:
+- عربي فصيح مؤسسي
+- مختصر ومباشر — لا مقدمات طويلة
+- لا تستخدم عبارات مثل "بالتأكيد" أو "سعيد بمساعدتك"
+- تعامل مع المستخدم كمسؤول رفيع المستوى
+- استخدم البيانات الفعلية فقط — لا تخترع أرقاماً
+- إذا لم تتوفر معلومة، قل ذلك صراحة
+- تجنب النقاط (bullets) إلا للضرورة — استخدم صياغة نثرية
+- لا تستخدم رموز تعبيرية مطلقاً
 
-When analyzing requests:
-- For data analysis, statistics, or event distribution questions -> route to Data Analysis (Agent)
-- For missing information or follow-up needs -> route to Follow-up & Communication (Agent)
-- For reports, summaries, or committee documents -> route to Reporting (Agent)
-- For quality checks or data validation -> route to Quality Assurance (Agent)"""
+عند تحليل الطلب:
+- طلبات تحليل البيانات والإحصائيات -> وكيل تحليل البيانات
+- طلبات المعلومات الناقصة والمتابعة -> وكيل المتابعة والتواصل
+- طلبات التقارير والملخصات -> وكيل إعداد التقارير
+- طلبات فحص الجودة والتحقق -> وكيل فحص الجودة"""
 
 
 class CoordinatorAgent(BaseAgent):
-    """
-    Coordinator/Orchestrator agent for Project 1.
-    Coordination (Agent) - Main orchestrator
-    """
+    """وكيل التنسيق — المنسق الرئيسي للجنة الفعاليات"""
 
     def __init__(self):
         super().__init__(
-            name="Coordination (Agent)",
-            name_en="Coordination (Agent)",
-            description="Routes requests and manages workflow across all sub-agents",
+            name="وكيل التنسيق",
+            name_en="وكيل التنسيق",
+            description="توجيه الطلبات وتنسيق سير العمل",
             temperature=0.3
         )
 
-        # Lazy initialization of specialist agents
         self._data_analysis_agent = None
         self._followup_agent = None
         self._reporting_agent = None
@@ -99,12 +96,11 @@ class CoordinatorAgent(BaseAgent):
         """Classify user intent based on keywords."""
         message_lower = message.lower()
 
-        # English keywords for intent classification
         intent_keywords = {
-            "data_analysis": ["analyze", "analysis", "statistics", "distribution", "data", "events", "total", "count", "summary"],
-            "followup": ["missing", "incomplete", "follow-up", "follow up", "email", "contact", "gap", "lacking"],
-            "reporting": ["report", "committee", "executive", "briefing", "document", "prepare", "summary"],
-            "quality_check": ["quality", "check", "validate", "verify", "complete", "accuracy"]
+            "data_analysis": ["تحليل", "بيانات", "إحصائيات", "توزيع", "إجمالي", "فعاليات", "تصنيف", "نوع", "جهة", "analyze", "analysis", "statistics", "data", "events", "total", "count"],
+            "followup": ["متابعة", "رسالة", "بريد", "تواصل", "ناقص", "مطلوب", "استكمال", "إرسال", "missing", "follow-up", "follow up", "email", "gap", "incomplete"],
+            "reporting": ["تقرير", "ملخص", "لجنة", "اجتماع", "تنفيذي", "report", "committee", "executive", "briefing", "summary", "prepare"],
+            "quality_check": ["جودة", "فحص", "تحقق", "اكتمال", "صحة", "quality", "check", "validate", "verify", "complete", "accuracy"]
         }
 
         scores = {}
@@ -139,26 +135,17 @@ class CoordinatorAgent(BaseAgent):
     ) -> AgentResponse:
         """Route the request to appropriate agents."""
         self._clear_thinking()
-        self._log_thinking("Analyzing request to determine appropriate agent...")
-
-        # Check for quality check request
-        quality_keywords = ["quality", "check", "validate", "verify", "complete"]
-        if any(kw in user_message.lower() for kw in quality_keywords):
-            self._log_thinking("Routing to: Quality Assurance (Agent)")
-            response = self.quality_check_agent.invoke(user_message, context, conversation_history)
-            combined_thinking = self._get_thinking_trace() + "\n\n" + response.thinking
-            response.thinking = combined_thinking
-            return response
+        self._log_thinking("تحليل الطلب لتحديد الوكيل المناسب...")
 
         # Classify intent
         intent, confidence = self._classify_intent(user_message)
-        self._log_thinking(f"Intent classified: {intent} (confidence: {confidence:.0%})")
+        self._log_thinking(f"تصنيف الطلب: {intent} (ثقة: {confidence:.0%})")
 
         # Get appropriate agent
         agent = self._get_agent_for_intent(intent)
 
         if agent:
-            self._log_thinking(f"Routing to: {agent.name}")
+            self._log_thinking(f"توجيه إلى: {agent.name}")
             response = agent.invoke(user_message, context, conversation_history)
 
             self._last_response = response
@@ -168,33 +155,21 @@ class CoordinatorAgent(BaseAgent):
             response.thinking = combined_thinking
             return response
 
-        # General response
         return self._provide_general_response(user_message)
 
     def _provide_general_response(self, user_message: str) -> AgentResponse:
-        """Provide general guidance."""
-        general_guidance = """## Welcome to the National Events Planning Oversight System
+        """Provide general guidance in Arabic."""
+        general_guidance = """نظام لجنة الفعاليات يضم الوكلاء التالية:
 
-I am the Coordination (Agent). I can help you with:
+وكيل تحليل البيانات — لتحليل بيانات الفعاليات المستلمة من هيئات التطوير وإنتاج تقارير إحصائية.
 
-### Data Analysis
-Analyze event data from implementing entities and produce statistical reports.
-**Example:** "Analyze the event data we received"
+وكيل المتابعة والتواصل — لتحديد المعلومات الناقصة وصياغة رسائل المتابعة للهيئات.
 
-### Follow-up & Communication
-Identify missing information and draft follow-up messages to entities.
-**Example:** "What information is missing from Entity B?"
+وكيل إعداد التقارير — لتجميع النتائج وإعداد تقارير اللجنة الإشرافية.
 
-### Committee Reporting
-Compile results and prepare reports for the oversight committee.
-**Example:** "Prepare a status report for the committee"
+وكيل فحص الجودة — للتحقق من اكتمال البيانات وجودتها.
 
-### Quality Assurance
-Verify data completeness and quality.
-**Example:** "Check data quality for received submissions"
-
----
-How can I assist you today?"""
+يمكنك توجيه طلبك مباشرة وسيتم تحويله للوكيل المناسب."""
 
         return AgentResponse(
             content=general_guidance,
@@ -207,24 +182,8 @@ How can I assist you today?"""
     def get_available_agents(self) -> List[Dict]:
         """Get information about available agents."""
         return [
-            {
-                "name": self.data_analysis_agent.name,
-                "name_en": self.data_analysis_agent.name_en,
-                "description": self.data_analysis_agent.description,
-            },
-            {
-                "name": self.followup_agent.name,
-                "name_en": self.followup_agent.name_en,
-                "description": self.followup_agent.description,
-            },
-            {
-                "name": self.reporting_agent.name,
-                "name_en": self.reporting_agent.name_en,
-                "description": self.reporting_agent.description,
-            },
-            {
-                "name": self.quality_check_agent.name,
-                "name_en": self.quality_check_agent.name_en,
-                "description": self.quality_check_agent.description,
-            },
+            {"name": self.data_analysis_agent.name, "name_en": self.data_analysis_agent.name_en, "description": self.data_analysis_agent.description},
+            {"name": self.followup_agent.name, "name_en": self.followup_agent.name_en, "description": self.followup_agent.description},
+            {"name": self.reporting_agent.name, "name_en": self.reporting_agent.name_en, "description": self.reporting_agent.description},
+            {"name": self.quality_check_agent.name, "name_en": self.quality_check_agent.name_en, "description": self.quality_check_agent.description},
         ]

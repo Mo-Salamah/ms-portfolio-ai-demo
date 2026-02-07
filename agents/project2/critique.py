@@ -1,55 +1,54 @@
 """
-Critique Agent for Project 2 - Major Celebrations Planning
-
-Reviews outputs and provides constructive feedback.
+وكيل المراجعة — احتفالية مرور ٣٠٠ عام على تأسيس الدولة السعودية
 """
 
 from typing import Optional, Dict, List
 from ..base_agent import BaseAgent, AgentResponse
 
 
-CRITIQUE_SYSTEM_PROMPT = """You are a Critique and Review Agent specialized in evaluating strategic outputs.
+CRITIQUE_SYSTEM_PROMPT = """أنت وكيل المراجعة المتخصص في تقييم المخرجات الاستراتيجية.
 
-IMPORTANT: Always respond in English.
+دورك:
+١. مراجعة المحتوى بعين نقدية وبناءة
+٢. تحديد نقاط القوة ومجالات التميز
+٣. اكتشاف الفجوات والنقاط الضعيفة
+٤. تقديم اقتراحات محددة للتحسين
+٥. ضمان الاتساق والدقة
 
-Your role:
-1. Review content with a critical and constructive eye
-2. Identify strengths and areas of excellence
-3. Discover gaps and weaknesses
-4. Provide specific suggestions for improvement
-5. Ensure consistency and accuracy
+معايير المراجعة:
+- الاكتمال: هل يغطي المحتوى جميع الجوانب المطلوبة؟
+- الدقة: هل المعلومات صحيحة ومدعومة؟
+- الوضوح: هل الأفكار واضحة ومنظمة؟
+- القابلية للتنفيذ: هل التوصيات عملية وواقعية؟
+- الملاءمة: هل المحتوى مناسب للسياق المحلي؟
 
-Review Criteria:
-- Completeness: Does the content cover all required aspects?
-- Accuracy: Is the information correct and supported?
-- Clarity: Are the ideas clear and organized?
-- Actionability: Are the recommendations practical and realistic?
-- Relevance: Is the content appropriate for the local context?
+هيكل المراجعة:
+١. ملخص عام للمحتوى
+٢. نقاط القوة (٣-٥ نقاط)
+٣. مجالات التحسين (٣-٥ نقاط)
+٤. اقتراحات محددة
+٥. التقييم العام
 
-Review Structure:
-1. General summary of content
-2. Strengths (3-5 points)
-3. Areas for Improvement (3-5 points)
-4. Specific suggestions
-5. Overall assessment
-
-Critique Style:
-- Constructive and professional
-- Specific and actionable
-- Balanced between positive and negative
-- Supported with examples"""
+أسلوب الرد:
+- عربي فصيح مؤسسي
+- مختصر ومباشر — لا مقدمات طويلة
+- لا تستخدم عبارات مثل "بالتأكيد" أو "سعيد بمساعدتك"
+- تعامل مع المستخدم كمسؤول رفيع المستوى
+- نقد بنّاء ومهني
+- محدد وقابل للتنفيذ
+- متوازن بين الإيجابي والسلبي
+- مدعوم بأمثلة
+- لا تستخدم رموز تعبيرية مطلقاً"""
 
 
 class CritiqueAgent(BaseAgent):
-    """
-    Critique specialist for Project 2.
-    """
+    """وكيل المراجعة — متخصص في مراجعة المخرجات وتقديم ملاحظات بناءة"""
 
     def __init__(self):
         super().__init__(
-            name="Critique Agent",
-            name_en="Critique Agent",
-            description="Review outputs and provide constructive feedback",
+            name="وكيل المراجعة",
+            name_en="وكيل المراجعة",
+            description="مراجعة المخرجات وتقديم ملاحظات بناءة",
             temperature=0.4
         )
 
@@ -62,39 +61,29 @@ class CritiqueAgent(BaseAgent):
         source_agent: str = None,
         original_request: str = None
     ) -> AgentResponse:
-        """
-        Review content and provide feedback.
-
-        Args:
-            content_to_review: The content to be reviewed
-            source_agent: Name of the agent that produced the content
-            original_request: The original user request
-
-        Returns:
-            AgentResponse with critique
-        """
+        """Review content and provide feedback."""
         self._clear_thinking()
-        self._log_thinking("Reviewing content...")
+        self._log_thinking("مراجعة المحتوى...")
 
-        review_request = f"""## Review Request
+        review_request = f"""## طلب مراجعة
 
-**Content to review:**
+**المحتوى للمراجعة:**
 {content_to_review}
 
 """
         if source_agent:
-            review_request += f"**Source:** {source_agent}\n"
+            review_request += f"**المصدر:** {source_agent}\n"
         if original_request:
-            review_request += f"**Original Request:** {original_request}\n"
+            review_request += f"**الطلب الأصلي:** {original_request}\n"
 
         review_request += """
 ---
-Provide a comprehensive review including:
-1. Content summary
-2. Strengths
-3. Areas for improvement
-4. Specific suggestions
-5. Overall assessment"""
+قدم مراجعة شاملة تشمل:
+١. ملخص المحتوى
+٢. نقاط القوة
+٣. مجالات التحسين
+٤. اقتراحات محددة
+٥. التقييم العام"""
 
         return self.invoke(review_request)
 
@@ -106,12 +95,12 @@ Provide a comprehensive review including:
     ) -> AgentResponse:
         """Provide critique based on user request."""
         self._clear_thinking()
-        self._log_thinking("Preparing critical review...")
+        self._log_thinking("إعداد المراجعة النقدية...")
 
         messages = self._build_messages(user_message, context, conversation_history)
 
         try:
-            self._log_thinking("Analyzing content...")
+            self._log_thinking("تحليل المحتوى...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -122,7 +111,7 @@ Provide a comprehensive review including:
             )
 
             response_text = response.content[0].text
-            self._log_thinking("Review prepared successfully")
+            self._log_thinking("اكتملت المراجعة")
 
             metadata = {
                 "model": self.model,
@@ -140,25 +129,11 @@ Provide a comprehensive review including:
             )
 
         except Exception as e:
-            self._log_thinking(f"Error occurred: {str(e)}")
+            self._log_thinking(f"حدث خطأ: {str(e)}")
             return AgentResponse(
-                content=f"Sorry, an error occurred during review: {str(e)}",
+                content=f"حدث خطأ أثناء المراجعة: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,
                 agent_name_en=self.name_en
             )
-
-
-    def quick_review(self, content: str) -> AgentResponse:
-        """Provide a quick review focusing on key points."""
-        request = f"""Provide a quick and focused review of the following content:
-
-{content}
-
-Focus on:
-1. Top 3 strengths
-2. Top 3 areas for improvement
-3. One key recommendation"""
-
-        return self.invoke(request)

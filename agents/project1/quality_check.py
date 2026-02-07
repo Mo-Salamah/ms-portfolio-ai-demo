@@ -1,7 +1,5 @@
 """
-Quality Check Agent for Project 1 - Events Oversight
-
-Validates data completeness and quality.
+وكيل فحص الجودة — لجنة الفعاليات
 """
 
 from typing import Optional, Dict, List
@@ -9,56 +7,55 @@ from ..base_agent import BaseAgent, AgentResponse
 from utils.knowledge_base import KnowledgeBase
 
 
-QUALITY_CHECK_SYSTEM_PROMPT = """You are a Quality Check Agent specialized in the National Events Planning Oversight project.
+QUALITY_CHECK_SYSTEM_PROMPT = """أنت وكيل فحص الجودة المتخصص في نظام لجنة الفعاليات.
 
-IMPORTANT: Always respond in English.
+مهامك الرئيسية:
+١. التحقق من اكتمال البيانات لكل فعالية
+٢. التحقق من دقة البيانات ومنطقيتها
+٣. تحديد التناقضات والأخطاء
+٤. تصنيف جودة البيانات لكل هيئة تطوير
+٥. تقديم توصيات لتحسين جودة البيانات
 
-Your main tasks:
-1. Verify data completeness for each event
-2. Verify data accuracy and logic
-3. Identify inconsistencies and errors
-4. Classify data quality for each implementing entity
-5. Provide recommendations for data quality improvement
+معايير الجودة:
+١. الاكتمال: جميع الحقول المطلوبة معبأة
+٢. الدقة: البيانات منطقية ومتسقة
+٣. الحداثة: التواريخ صحيحة ومستقبلية
+٤. التنسيق: البيانات بالشكل الصحيح
 
-Quality Criteria:
-1. Completeness: All required fields are filled
-2. Accuracy: Data is logical and consistent
-3. Timeliness: Dates are correct and in the future
-4. Formatting: Data is in the correct format
+الحقول المطلوبة:
+- اسم الفعالية
+- التاريخ
+- المدينة
+- الموقع
+- هيئة التطوير
+- الحضور المتوقع
+- الميزانية (مفضل)
+- الوصف (مفضل)
 
-Required Fields:
-- Event Name
-- Date
-- City
-- Venue
-- Implementing Entity
-- Expected Attendance
-- Budget (preferred)
-- Description (preferred)
+تصنيف الجودة:
+- ممتاز: اكتمال ٩٠% فأكثر
+- جيد: اكتمال ٧٠-٨٩%
+- متوسط: اكتمال ٥٠-٦٩%
+- ضعيف: اكتمال أقل من ٥٠%
 
-Quality Classification:
-- 🟢 Excellent: 90%+ completeness
-- 🟡 Good: 70-89% completeness
-- 🟠 Average: 50-69% completeness
-- 🔴 Poor: Less than 50% completeness
-
-Output Style:
-- Clear and organized report
-- Use colors and symbols for classification
-- Details of issues discovered
-- Specific recommendations for improvement"""
+أسلوب الرد:
+- عربي فصيح مؤسسي
+- مختصر ومباشر — لا مقدمات طويلة
+- لا تستخدم عبارات مثل "بالتأكيد" أو "سعيد بمساعدتك"
+- تعامل مع المستخدم كمسؤول رفيع المستوى
+- استخدم البيانات الفعلية فقط — لا تخترع أرقاماً
+- إذا لم تتوفر معلومة، قل ذلك صراحة
+- لا تستخدم رموز تعبيرية مطلقاً"""
 
 
 class QualityCheckAgent(BaseAgent):
-    """
-    Quality Check specialist for Project 1.
-    """
+    """وكيل فحص الجودة — متخصص في التحقق من اكتمال البيانات وجودتها"""
 
     def __init__(self):
         super().__init__(
-            name="Quality Check Agent",
-            name_en="Quality Check Agent",
-            description="Verify data completeness and quality",
+            name="وكيل فحص الجودة",
+            name_en="وكيل فحص الجودة",
+            description="التحقق من اكتمال البيانات وجودتها",
             temperature=0.2
         )
         self.knowledge_base = KnowledgeBase()
@@ -69,6 +66,12 @@ class QualityCheckAgent(BaseAgent):
     def _check_data_quality(self) -> Dict:
         """Perform comprehensive data quality check."""
         events = self.knowledge_base.get_all_events()
+
+        entity_map = {
+            "Implementing Entity A": "هيئة التطوير (أ)",
+            "Implementing Entity B": "هيئة التطوير (ب)",
+            "Implementing Entity C": "هيئة التطوير (ج)",
+        }
 
         required_fields = ['name', 'date', 'city', 'venue', 'organizing_entity', 'expected_attendance']
         optional_fields = ['budget', 'description', 'category']
@@ -83,7 +86,8 @@ class QualityCheckAgent(BaseAgent):
         entity_scores = {}
 
         for event in events:
-            entity = event.get('organizing_entity', 'Unspecified')
+            entity_raw = event.get('organizing_entity', 'غير محدد')
+            entity = entity_map.get(entity_raw, entity_raw)
 
             if entity not in entity_scores:
                 entity_scores[entity] = {
@@ -94,19 +98,16 @@ class QualityCheckAgent(BaseAgent):
 
             entity_scores[entity]['total'] += 1
 
-            # Check required fields
             missing_required = []
             for field in required_fields:
                 if not event.get(field) or event.get(field) == 'Unspecified':
                     missing_required.append(field)
 
-            # Check optional fields
             missing_optional = []
             for field in optional_fields:
                 if not event.get(field):
                     missing_optional.append(field)
 
-            # Calculate completeness
             total_fields = len(required_fields) + len(optional_fields)
             filled_fields = total_fields - len(missing_required) - len(missing_optional)
             completeness = filled_fields / total_fields
@@ -114,19 +115,17 @@ class QualityCheckAgent(BaseAgent):
             if completeness >= 0.9:
                 entity_scores[entity]['complete'] += 1
 
-            # Record issues
             if missing_required:
                 issue = {
-                    'event': event.get('name', 'Unnamed'),
+                    'event': event.get('name', 'بدون اسم'),
                     'entity': entity,
-                    'type': 'Missing required fields',
+                    'type': 'حقول مطلوبة ناقصة',
                     'details': missing_required,
-                    'severity': 'High'
+                    'severity': 'عالية'
                 }
                 quality_report['issues'].append(issue)
                 entity_scores[entity]['issues'].append(issue)
 
-            # Check for logical issues
             if event.get('expected_attendance'):
                 try:
                     attendance = int(str(event['expected_attendance']).replace(',', ''))
@@ -134,26 +133,25 @@ class QualityCheckAgent(BaseAgent):
                         issue = {
                             'event': event.get('name'),
                             'entity': entity,
-                            'type': 'Unrealistic value',
-                            'details': f'Expected attendance too high: {attendance}',
-                            'severity': 'Medium'
+                            'type': 'قيمة غير واقعية',
+                            'details': f'الحضور المتوقع مرتفع جداً: {attendance}',
+                            'severity': 'متوسطة'
                         }
                         quality_report['issues'].append(issue)
                 except:
                     pass
 
-        # Calculate entity scores
         for entity, data in entity_scores.items():
             if data['total'] > 0:
                 score = data['complete'] * 100 // data['total']
                 if score >= 90:
-                    grade = '🟢 Excellent'
+                    grade = 'ممتاز'
                 elif score >= 70:
-                    grade = '🟡 Good'
+                    grade = 'جيد'
                 elif score >= 50:
-                    grade = '🟠 Average'
+                    grade = 'متوسط'
                 else:
-                    grade = '🔴 Poor'
+                    grade = 'ضعيف'
 
                 quality_report['by_entity'][entity] = {
                     'total': data['total'],
@@ -163,7 +161,6 @@ class QualityCheckAgent(BaseAgent):
                     'issues_count': len(data['issues'])
                 }
 
-        # Overall score
         if entity_scores:
             total_complete = sum(d['complete'] for d in entity_scores.values())
             total_events = sum(d['total'] for d in entity_scores.values())
@@ -173,27 +170,27 @@ class QualityCheckAgent(BaseAgent):
 
     def _format_quality_report(self, report: Dict) -> str:
         """Format quality report for display."""
-        output = f"""## Quality Check Report
+        output = f"""## تقرير فحص الجودة
 
-### Overall Score: {report['overall_score']}%
+### النتيجة الإجمالية: {report['overall_score']}%
 
-### Implementing Entity Assessment:
-| Entity | Events | Complete | Percentage | Grade | Issues |
-|--------|--------|----------|------------|-------|--------|
+### تقييم هيئات التطوير:
+| الجهة | الفعاليات | مكتملة | النسبة | التصنيف | المشكلات |
+|-------|----------|--------|--------|---------|----------|
 """
         for entity, data in report['by_entity'].items():
             output += f"| {entity} | {data['total']} | {data['complete']} | {data['score']}% | {data['grade']} | {data['issues_count']} |\n"
 
         if report['issues']:
-            output += f"\n### Issues Discovered ({len(report['issues'])}):\n\n"
+            output += f"\n### المشكلات المكتشفة ({len(report['issues'])}):\n\n"
             for i, issue in enumerate(report['issues'][:10], 1):
                 output += f"**{i}. {issue['event']}** ({issue['entity']})\n"
-                output += f"   - Type: {issue['type']}\n"
-                output += f"   - Details: {issue['details']}\n"
-                output += f"   - Severity: {issue['severity']}\n\n"
+                output += f"   - النوع: {issue['type']}\n"
+                output += f"   - التفاصيل: {issue['details']}\n"
+                output += f"   - الخطورة: {issue['severity']}\n\n"
 
             if len(report['issues']) > 10:
-                output += f"*and {len(report['issues']) - 10} more issues...*\n"
+                output += f"*و{len(report['issues']) - 10} مشكلات أخرى...*\n"
 
         return output
 
@@ -205,27 +202,25 @@ class QualityCheckAgent(BaseAgent):
     ) -> AgentResponse:
         """Perform quality check and provide recommendations."""
         self._clear_thinking()
-        self._log_thinking("Checking data quality...")
+        self._log_thinking("فحص جودة البيانات...")
 
-        # Perform quality check
         quality_report = self._check_data_quality()
         formatted_report = self._format_quality_report(quality_report)
 
-        self._log_thinking(f"Checked {quality_report['total_events']} events")
-        self._log_thinking(f"Overall score: {quality_report['overall_score']}%")
+        self._log_thinking(f"تم فحص {quality_report['total_events']} فعالية")
+        self._log_thinking(f"النتيجة الإجمالية: {quality_report['overall_score']}%")
 
-        # Build enhanced message
-        enhanced_message = f"""User request: {user_message}
+        enhanced_message = f"""طلب المستخدم: {user_message}
 
-Quality check results:
+نتائج فحص الجودة:
 {formatted_report}
 
-Provide a comprehensive analysis and recommendations for improving data quality."""
+قدم تحليلاً شاملاً وتوصيات لتحسين جودة البيانات."""
 
         messages = self._build_messages(enhanced_message, context, conversation_history)
 
         try:
-            self._log_thinking("Preparing recommendations...")
+            self._log_thinking("إعداد التوصيات...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -236,7 +231,7 @@ Provide a comprehensive analysis and recommendations for improving data quality.
             )
 
             response_text = response.content[0].text
-            self._log_thinking("Quality report prepared successfully")
+            self._log_thinking("اكتمل تقرير فحص الجودة")
 
             metadata = {
                 "model": self.model,
@@ -255,9 +250,9 @@ Provide a comprehensive analysis and recommendations for improving data quality.
             )
 
         except Exception as e:
-            self._log_thinking(f"Error occurred: {str(e)}")
+            self._log_thinking(f"حدث خطأ: {str(e)}")
             return AgentResponse(
-                content=f"Sorry, an error occurred during quality check: {str(e)}",
+                content=f"حدث خطأ أثناء فحص الجودة: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,

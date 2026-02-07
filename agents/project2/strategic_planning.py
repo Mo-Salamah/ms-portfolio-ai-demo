@@ -1,8 +1,5 @@
 """
-Strategic Planning Agent for Project 2 - Major Celebrations Planning
-Strategic Planning (Agent) - Main orchestrator for celebrations planning
-
-This is the orchestrator for Project 2, managing strategic workflow.
+وكيل التخطيط الاستراتيجي — احتفالية مرور ٣٠٠ عام على تأسيس الدولة السعودية
 """
 
 from typing import Optional, Dict, List, Tuple
@@ -10,53 +7,53 @@ from ..base_agent import BaseAgent, AgentResponse
 from config import INTENT_KEYWORDS
 
 
-STRATEGIC_PLANNING_SYSTEM_PROMPT = """You are the Strategic Planning (Agent) for the Major Celebrations Strategic Planning project.
+STRATEGIC_PLANNING_SYSTEM_PROMPT = """أنت وكيل التخطيط الاستراتيجي في نظام احتفالية مرور ٣٠٠ عام على تأسيس الدولة السعودية.
 
-Your role:
-- Manage the strategic workflow and coordinate between agents
-- Improve and clarify user requests before routing
-- Ensure quality of strategic outputs
-- Provide comprehensive and integrated vision
+دورك:
+- إدارة سير العمل الاستراتيجي والتنسيق بين الوكلاء
+- تحسين وتوضيح طلبات المستخدم قبل توجيهها
+- ضمان جودة المخرجات الاستراتيجية
+- تقديم رؤية شاملة ومتكاملة
 
-Available Agents:
-1. Benchmarking (Agent) - Studies international celebration experiences
-2. KPI Development (Agent) - Recommends performance indicators
-3. Critique & Review (Agent) - Reviews and improves outputs
-4. Content Preparation (Agent) - Formats presentations and slides
+الوكلاء المتاحون:
+١. وكيل المقارنة المعيارية — يدرس تجارب الاحتفاليات الدولية
+٢. وكيل مؤشرات الأداء — يوصي بمؤشرات الأداء
+٣. وكيل المراجعة — يراجع المخرجات ويقدم ملاحظات بناءة
+٤. وكيل إعداد المحتوى — ينسق المحتوى للعروض التقديمية
 
-Context:
-- Objective: Develop vision and strategic framework for a historic national celebration
-- Duration: 20 weeks
-- Expected Deliverables: Benchmarking report, KPI framework, positioning options, leadership presentations
+السياق:
+- الهدف: تطوير الرؤية والإطار الاستراتيجي لاحتفالية وطنية تاريخية
+- المدة: ٢٠ أسبوع
+- المخرجات المتوقعة: تقرير المقارنة المعيارية وإطار مؤشرات الأداء وخيارات التموضع وعروض تقديمية للقيادة
 
-Working Style:
-- Carefully analyze requests before routing
-- Clarify ambiguous requests
-- Ensure output consistency
-- Provide comprehensive summaries
+أسلوب الرد:
+- عربي فصيح مؤسسي
+- مختصر ومباشر — لا مقدمات طويلة
+- لا تستخدم عبارات مثل "بالتأكيد" أو "سعيد بمساعدتك"
+- تعامل مع المستخدم كمسؤول رفيع المستوى
+- استخدم البيانات الفعلية فقط — لا تخترع أرقاماً
+- إذا لم تتوفر معلومة، قل ذلك صراحة
+- تجنب النقاط (bullets) إلا للضرورة — استخدم صياغة نثرية
+- لا تستخدم رموز تعبيرية مطلقاً
 
-When analyzing requests:
-- For international comparisons, case studies, or benchmarking -> route to Benchmarking (Agent)
-- For KPIs, metrics, or performance indicators -> route to KPI Development (Agent)
-- For reviewing or critiquing previous outputs -> route to Critique & Review (Agent)
-- For slides, presentations, or content formatting -> route to Content Preparation (Agent)"""
+عند تحليل الطلب:
+- طلبات المقارنة والدراسات والتجارب الدولية -> وكيل المقارنة المعيارية
+- طلبات المؤشرات والقياس والأداء -> وكيل مؤشرات الأداء
+- طلبات المراجعة والنقد والتقييم -> وكيل المراجعة
+- طلبات العروض التقديمية والشرائح -> وكيل إعداد المحتوى"""
 
 
 class StrategicPlanningAgent(BaseAgent):
-    """
-    Strategic Planning/Orchestrator agent for Project 2.
-    Strategic Planning (Agent) - Main orchestrator
-    """
+    """وكيل التخطيط الاستراتيجي — المنسق الرئيسي لاحتفالية ٣٠٠ عام"""
 
     def __init__(self):
         super().__init__(
-            name="Strategic Planning (Agent)",
-            name_en="Strategic Planning (Agent)",
-            description="Orchestrates research and synthesizes strategic recommendations",
+            name="وكيل التخطيط الاستراتيجي",
+            name_en="وكيل التخطيط الاستراتيجي",
+            description="إدارة سير العمل الاستراتيجي والتنسيق",
             temperature=0.3
         )
 
-        # Lazy initialization
         self._benchmarking_agent = None
         self._kpi_agent = None
         self._critique_agent = None
@@ -100,12 +97,11 @@ class StrategicPlanningAgent(BaseAgent):
         """Classify user intent based on keywords."""
         message_lower = message.lower()
 
-        # English keywords for intent classification
         intent_keywords = {
-            "benchmarking": ["benchmark", "compare", "comparison", "international", "case study", "st. petersburg", "petersburg", "experience", "best practice"],
-            "kpi": ["kpi", "indicator", "metric", "measure", "performance", "target", "goal"],
-            "critique": ["review", "critique", "feedback", "improve", "evaluate", "assess", "previous"],
-            "slide": ["slide", "presentation", "convert", "format", "content", "powerpoint", "deck"]
+            "benchmarking": ["مقارنة", "معايير", "دراسة حالة", "تجارب دولية", "أفضل الممارسات", "مقارن", "benchmark", "تحليل مقارن", "سانت بطرسبرغ", "روما", "برشلونة", "تجارب عالمية"],
+            "kpi": ["مؤشرات", "قياس", "أداء", "KPI", "تقييم", "مؤشر", "قياسات", "متابعة", "رصد", "مقاييس"],
+            "critique": ["مراجعة", "نقد", "تحسين", "تقييم", "تحليل نقدي", "راجع", "قيم", "حلل", "ملاحظات", "تعليقات"],
+            "slide": ["عرض", "شريحة", "تقديم", "عرض تقديمي", "شرائح", "بوربوينت", "تلخيص", "للعرض", "slide", "presentation", "convert", "format", "powerpoint"]
         }
 
         scores = {}
@@ -134,12 +130,12 @@ class StrategicPlanningAgent(BaseAgent):
 
     def _should_use_critique(self, message: str) -> bool:
         """Check if the message is asking to review previous content."""
-        review_keywords = ["review", "critique", "evaluate", "feedback", "improve", "assess"]
+        review_keywords = ["مراجعة", "راجع", "نقد", "تقييم", "review", "critique"]
         return any(kw in message.lower() for kw in review_keywords) and self._last_response is not None
 
     def _should_format_slides(self, message: str) -> bool:
         """Check if the message is asking to format for slides."""
-        slide_keywords = ["slide", "presentation", "convert", "format", "powerpoint"]
+        slide_keywords = ["عرض تقديمي", "شرائح", "شريحة", "حوّل", "slide", "presentation"]
         return any(kw in message.lower() for kw in slide_keywords) and self._last_response is not None
 
     def invoke(
@@ -150,12 +146,12 @@ class StrategicPlanningAgent(BaseAgent):
     ) -> AgentResponse:
         """Route the request to appropriate agents."""
         self._clear_thinking()
-        self._log_thinking("Analyzing strategic request...")
+        self._log_thinking("تحليل الطلب الاستراتيجي...")
 
         # Check for critique request
         if self._should_use_critique(user_message):
-            self._log_thinking("Request relates to reviewing previous content")
-            self._log_thinking(f"Routing to: {self.critique_agent.name}")
+            self._log_thinking("الطلب يتعلق بمراجعة محتوى سابق")
+            self._log_thinking(f"توجيه إلى: {self.critique_agent.name}")
 
             response = self.critique_agent.review(
                 content_to_review=self._last_response.content,
@@ -169,8 +165,8 @@ class StrategicPlanningAgent(BaseAgent):
 
         # Check for slide formatting
         if self._should_format_slides(user_message):
-            self._log_thinking("Request relates to formatting content for presentation")
-            self._log_thinking(f"Routing to: {self.content_prep_agent.name}")
+            self._log_thinking("الطلب يتعلق بتنسيق المحتوى للعرض التقديمي")
+            self._log_thinking(f"توجيه إلى: {self.content_prep_agent.name}")
 
             response = self.content_prep_agent.format_for_slides(
                 content=self._last_response.content
@@ -182,13 +178,13 @@ class StrategicPlanningAgent(BaseAgent):
 
         # Classify intent
         intent, confidence = self._classify_intent(user_message)
-        self._log_thinking(f"Intent classified: {intent} (confidence: {confidence:.0%})")
+        self._log_thinking(f"تصنيف الطلب: {intent} (ثقة: {confidence:.0%})")
 
         # Get appropriate agent
         agent = self._get_agent_for_intent(intent)
 
         if agent:
-            self._log_thinking(f"Routing to: {agent.name}")
+            self._log_thinking(f"توجيه إلى: {agent.name}")
             response = agent.invoke(user_message, context, conversation_history)
 
             self._last_response = response
@@ -198,33 +194,21 @@ class StrategicPlanningAgent(BaseAgent):
             response.thinking = combined_thinking
             return response
 
-        # General response
         return self._provide_general_response(user_message)
 
     def _provide_general_response(self, user_message: str) -> AgentResponse:
-        """Provide general strategic guidance."""
-        general_guidance = """## Welcome to the Major Celebrations Strategic Planning System
+        """Provide general strategic guidance in Arabic."""
+        general_guidance = """نظام احتفالية مرور ٣٠٠ عام يضم الوكلاء التالية:
 
-I am the Strategic Planning (Agent). I can help you with:
+وكيل المقارنة المعيارية — لدراسة وتحليل تجارب الاحتفاليات الدولية الكبرى واستخلاص الدروس المستفادة.
 
-### International Benchmarking
-Study and analyze major international celebration experiences.
-**Example:** "I need benchmarking on St. Petersburg 300th Anniversary"
+وكيل مؤشرات الأداء — لتوصية مؤشرات أداء مناسبة وتحديد طرق القياس والمتابعة.
 
-### Key Performance Indicators
-Recommendations for measuring celebration success.
-**Example:** "What KPIs do you recommend?"
+وكيل المراجعة — لمراجعة المخرجات وتقديم ملاحظات بناءة لتحسين الجودة.
 
-### Review and Critique
-Review outputs and provide constructive feedback.
-**Example:** "Review the previous analysis"
+وكيل إعداد المحتوى — لتنسيق المحتوى وتحويله إلى عروض تقديمية جاهزة للقيادة.
 
-### Presentation Content
-Transform content into professional presentations.
-**Example:** "Convert to presentation slides"
-
----
-How can I assist you with strategic planning today?"""
+يمكنك توجيه طلبك مباشرة وسيتم تحويله للوكيل المناسب."""
 
         return AgentResponse(
             content=general_guidance,
@@ -237,24 +221,8 @@ How can I assist you with strategic planning today?"""
     def get_available_agents(self) -> List[Dict]:
         """Get information about available agents."""
         return [
-            {
-                "name": self.benchmarking_agent.name,
-                "name_en": self.benchmarking_agent.name_en,
-                "description": self.benchmarking_agent.description,
-            },
-            {
-                "name": self.kpi_agent.name,
-                "name_en": self.kpi_agent.name_en,
-                "description": self.kpi_agent.description,
-            },
-            {
-                "name": self.critique_agent.name,
-                "name_en": self.critique_agent.name_en,
-                "description": self.critique_agent.description,
-            },
-            {
-                "name": self.content_prep_agent.name,
-                "name_en": self.content_prep_agent.name_en,
-                "description": self.content_prep_agent.description,
-            },
+            {"name": self.benchmarking_agent.name, "name_en": self.benchmarking_agent.name_en, "description": self.benchmarking_agent.description},
+            {"name": self.kpi_agent.name, "name_en": self.kpi_agent.name_en, "description": self.kpi_agent.description},
+            {"name": self.critique_agent.name, "name_en": self.critique_agent.name_en, "description": self.critique_agent.description},
+            {"name": self.content_prep_agent.name, "name_en": self.content_prep_agent.name_en, "description": self.content_prep_agent.description},
         ]

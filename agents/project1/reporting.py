@@ -1,7 +1,5 @@
 """
-Reporting Agent for Project 1 - Events Oversight
-
-Compiles results and prepares committee reports.
+وكيل إعداد التقارير — لجنة الفعاليات
 """
 
 from typing import Optional, Dict, List
@@ -9,46 +7,48 @@ from ..base_agent import BaseAgent, AgentResponse
 from utils.knowledge_base import KnowledgeBase
 
 
-REPORTING_SYSTEM_PROMPT = """You are a Reporting Agent specialized in the National Events Planning Oversight project.
+REPORTING_SYSTEM_PROMPT = """أنت وكيل إعداد التقارير المتخصص في نظام لجنة الفعاليات.
 
-IMPORTANT: Always respond in English.
+مهامك الرئيسية:
+١. تجميع النتائج والتحليلات من مصادر متعددة
+٢. إعداد التقارير الدورية للجنة الإشرافية
+٣. إعداد الملخصات التنفيذية للقيادة
+٤. توثيق التقدم والتحديات والمخاطر
 
-Your main tasks:
-1. Compile results and analyses from various sources
-2. Prepare periodic reports for the oversight committee
-3. Prepare executive summaries for leadership
-4. Document progress, challenges, and risks
+الجمهور المستهدف:
+- اللجنة الإشرافية العليا
+- القيادة
+- فريق التنسيق والمتابعة
 
-Target Audience:
-- Senior Oversight Committee
-- Government Leadership
-- Coordination and Follow-up Team
+هيكل التقرير:
+١. الملخص التنفيذي (النقاط الرئيسية)
+٢. الوضع الحالي (إحصائيات ونسب الإنجاز)
+٣. التحديات والمخاطر
+٤. الإجراءات المتخذة
+٥. الخطوات التالية
+٦. التوصيات
 
-Report Structure:
-1. Executive Summary (key points)
-2. Current Status (statistics and completion rates)
-3. Challenges and Risks
-4. Actions Taken
-5. Next Steps
-6. Recommendations
-
-Writing Style:
-- Concise and direct
-- Use numbers and percentages
-- Highlight critical points
-- Actionable recommendations"""
+أسلوب الرد:
+- عربي فصيح مؤسسي
+- مختصر ومباشر — لا مقدمات طويلة
+- لا تستخدم عبارات مثل "بالتأكيد" أو "سعيد بمساعدتك"
+- تعامل مع المستخدم كمسؤول رفيع المستوى
+- استخدم البيانات الفعلية فقط — لا تخترع أرقاماً
+- إذا لم تتوفر معلومة، قل ذلك صراحة
+- لا تستخدم رموز تعبيرية مطلقاً
+- استخدم الأرقام والنسب المئوية
+- أبرز النقاط الحرجة
+- قدم توصيات قابلة للتنفيذ"""
 
 
 class ReportingAgent(BaseAgent):
-    """
-    Reporting specialist for Project 1.
-    """
+    """وكيل إعداد التقارير — متخصص في تجميع النتائج وإعداد تقارير اللجان"""
 
     def __init__(self):
         super().__init__(
-            name="Reporting Agent",
-            name_en="Reporting Agent",
-            description="Compile results and prepare committee reports",
+            name="وكيل إعداد التقارير",
+            name_en="وكيل إعداد التقارير",
+            description="تجميع النتائج وإعداد تقارير اللجان",
             temperature=0.4
         )
         self.knowledge_base = KnowledgeBase()
@@ -60,6 +60,12 @@ class ReportingAgent(BaseAgent):
         """Get overall status summary."""
         events = self.knowledge_base.get_all_events()
 
+        entity_map = {
+            "Implementing Entity A": "هيئة التطوير (أ)",
+            "Implementing Entity B": "هيئة التطوير (ب)",
+            "Implementing Entity C": "هيئة التطوير (ج)",
+        }
+
         total = len(events)
         by_status = {}
         by_entity = {}
@@ -68,17 +74,15 @@ class ReportingAgent(BaseAgent):
         required_fields = ['name', 'date', 'city', 'venue', 'expected_attendance']
 
         for event in events:
-            # Status
-            status = event.get('status', 'Unspecified')
+            status = event.get('status', 'غير محدد')
             by_status[status] = by_status.get(status, 0) + 1
 
-            # Entity
-            entity = event.get('organizing_entity', 'Unspecified')
+            entity_raw = event.get('organizing_entity', 'غير محدد')
+            entity = entity_map.get(entity_raw, entity_raw)
             if entity not in by_entity:
                 by_entity[entity] = {'total': 0, 'complete': 0}
             by_entity[entity]['total'] += 1
 
-            # Check completeness
             is_complete = all(event.get(f) for f in required_fields)
             if is_complete:
                 complete += 1
@@ -100,42 +104,39 @@ class ReportingAgent(BaseAgent):
     ) -> AgentResponse:
         """Prepare reports based on user request."""
         self._clear_thinking()
-        self._log_thinking("Compiling data for report preparation...")
+        self._log_thinking("تجميع البيانات لإعداد التقرير...")
 
-        # Get status summary
         status = self._get_status_summary()
-        self._log_thinking(f"Compiled data for {status['total_events']} events")
+        self._log_thinking(f"تم تجميع بيانات {status['total_events']} فعالية")
 
-        # Format status for context
-        status_text = f"""## Current Status Summary
+        status_text = f"""## ملخص الوضع الحالي
 
-### General Statistics:
-- Total Events: {status['total_events']}
-- Events with Complete Data: {status['complete_events']}
-- Completion Rate: {status['completion_rate']}%
+### الإحصائيات العامة:
+- إجمالي الفعاليات: {status['total_events']}
+- فعاليات مكتملة البيانات: {status['complete_events']}
+- نسبة الاكتمال: {status['completion_rate']}%
 
-### Distribution by Status:
+### التوزيع حسب الحالة:
 """
         for s, count in status['by_status'].items():
             status_text += f"- {s}: {count}\n"
 
-        status_text += "\n### Distribution by Implementing Entity:\n"
+        status_text += "\n### التوزيع حسب هيئة التطوير:\n"
         for entity, data in status['by_entity'].items():
             rate = data['complete'] * 100 // data['total'] if data['total'] > 0 else 0
-            status_text += f"- {entity}: {data['total']} events ({rate}% complete)\n"
+            status_text += f"- {entity}: {data['total']} فعالية ({rate}% مكتمل)\n"
 
-        # Build enhanced message
-        enhanced_message = f"""User request: {user_message}
+        enhanced_message = f"""طلب المستخدم: {user_message}
 
-Available data:
+البيانات المتاحة:
 {status_text}
 
-Prepare an appropriate report for the oversight committee based on this data and the user's request."""
+أعد تقريراً مناسباً للجنة الإشرافية بناءً على هذه البيانات وطلب المستخدم."""
 
         messages = self._build_messages(enhanced_message, context, conversation_history)
 
         try:
-            self._log_thinking("Drafting report...")
+            self._log_thinking("إعداد التقرير...")
 
             response = self.client.messages.create(
                 model=self.model,
@@ -146,7 +147,7 @@ Prepare an appropriate report for the oversight committee based on this data and
             )
 
             response_text = response.content[0].text
-            self._log_thinking("Report prepared successfully")
+            self._log_thinking("اكتمل إعداد التقرير")
 
             metadata = {
                 "model": self.model,
@@ -165,19 +166,11 @@ Prepare an appropriate report for the oversight committee based on this data and
             )
 
         except Exception as e:
-            self._log_thinking(f"Error occurred: {str(e)}")
+            self._log_thinking(f"حدث خطأ: {str(e)}")
             return AgentResponse(
-                content=f"Sorry, an error occurred while preparing the report: {str(e)}",
+                content=f"حدث خطأ أثناء إعداد التقرير: {str(e)}",
                 thinking=self._get_thinking_trace(),
                 metadata={"error": str(e)},
                 agent_name=self.name,
                 agent_name_en=self.name_en
             )
-
-    def prepare_committee_report(self) -> AgentResponse:
-        """Prepare a standard committee report."""
-        return self.invoke("Prepare a current status report for the oversight committee")
-
-    def prepare_executive_summary(self) -> AgentResponse:
-        """Prepare an executive summary."""
-        return self.invoke("Prepare a concise executive summary for leadership including key points and recommendations")

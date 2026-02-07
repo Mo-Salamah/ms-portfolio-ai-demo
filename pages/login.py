@@ -1,18 +1,35 @@
 """
-Login Page for MS Portfolio AI Agent Demo
+صفحة تسجيل الدخول — منصة الذكاء الاصطناعي للمحفظة (أ)
 """
 
+import csv
 import streamlit as st
+from pathlib import Path
 from config import THEME
 
 
-def render_login_page():
-    """Render the login page with professional styling."""
+# Path to users CSV file
+USERS_CSV_PATH = Path(__file__).parent.parent / "users.csv"
 
-    # Custom CSS for login page
+
+def authenticate_user(username: str, password: str) -> bool:
+    """Authenticate user against users.csv file."""
+    try:
+        with open(USERS_CSV_PATH, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row["username"].strip() == username and row["password"].strip() == password:
+                    return True
+    except FileNotFoundError:
+        return False
+    return False
+
+
+def render_login_page():
+    """Render the login page."""
+
     st.markdown(f"""
     <style>
-        /* Center the login form */
         .login-container {{
             max-width: 400px;
             margin: 0 auto;
@@ -25,97 +42,73 @@ def render_login_page():
         .login-header {{
             text-align: center;
             margin-bottom: 30px;
-        }}
-
-        .login-logo {{
-            font-size: 64px;
-            margin-bottom: 16px;
+            direction: rtl;
         }}
 
         .login-title {{
             color: {THEME['primary']};
-            font-size: 1.5em;
+            font-size: 1.4em;
             font-weight: bold;
             margin-bottom: 8px;
+            font-family: 'Noto Sans Arabic', sans-serif;
         }}
 
         .login-subtitle {{
             color: #666;
             font-size: 0.9em;
+            font-family: 'Noto Sans Arabic', sans-serif;
         }}
 
-        .demo-notice {{
-            background-color: #fef3c7;
-            border: 1px solid {THEME['accent']};
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 20px;
-            text-align: center;
-            font-size: 0.85em;
-            color: #92400e;
-        }}
-
-        /* Style the form - LTR */
         .stTextInput > div > div > input {{
-            direction: ltr;
-            text-align: left;
+            direction: rtl;
+            text-align: right;
         }}
     </style>
     """, unsafe_allow_html=True)
 
-    # Create centered layout
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
-        # Header with logo
-        st.markdown("""
+        st.markdown(f"""
         <div class="login-header">
-            <div class="login-logo"></div>
-            <div class="login-title">Strategic AI Platform</div>
-            <div class="login-subtitle">Multi-Agent System for Strategic Planning</div>
+            <div class="login-title">منصة الذكاء الاصطناعي للمحفظة (أ)</div>
+            <div class="login-subtitle">مكتب شؤون المهمات والمبادرات</div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Login form
         with st.form("login_form"):
-            st.markdown("##### Sign In")
+            st.markdown("##### تسجيل الدخول")
 
             username = st.text_input(
-                "Username",
-                placeholder="Enter your username",
+                "اسم المستخدم",
+                placeholder="أدخل اسم المستخدم",
                 key="username_input"
             )
 
             password = st.text_input(
-                "Password",
+                "كلمة المرور",
                 type="password",
-                placeholder="Enter your password",
+                placeholder="أدخل كلمة المرور",
                 key="password_input"
             )
 
             submit_button = st.form_submit_button(
-                "Sign In",
+                "دخول",
                 use_container_width=True,
                 type="primary"
             )
 
             if submit_button:
-                # Accept any credentials for demo
                 if username and password:
-                    st.session_state.authenticated = True
-                    st.session_state.username = username
-                    st.session_state.current_page = "project_select"
-                    st.rerun()
+                    if authenticate_user(username, password):
+                        st.session_state.authenticated = True
+                        st.session_state.username = username
+                        st.session_state.current_page = "project_select"
+                        st.rerun()
+                    else:
+                        st.error("اسم المستخدم أو كلمة المرور غير صحيحة")
                 else:
-                    st.error("Please enter both username and password")
-
-        # Demo notice
-        st.markdown("""
-        <div class="demo-notice">
-            <strong>Demo Mode</strong><br/>
-            You can use any username and password to sign in
-        </div>
-        """, unsafe_allow_html=True)
+                    st.error("يرجى إدخال اسم المستخدم وكلمة المرور")
 
 
 if __name__ == "__main__":
