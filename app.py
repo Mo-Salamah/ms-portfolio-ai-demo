@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="منصة الذكاء الاصطناعي للمحفظة (أ)",
     page_icon="",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # Global CSS for Arabic RTL layout
@@ -407,6 +407,32 @@ GLOBAL_CSS = f"""
         text-align: right;
         font-family: 'Noto Sans Arabic', sans-serif;
     }}
+
+    /* Hide sidebar collapse/expand control (arrow button) */
+    [data-testid="stSidebarCollapsedControl"] {{
+        display: none !important;
+    }}
+
+    /* Hide the sidebar nav separator */
+    [data-testid="stSidebarNavSeparator"] {{
+        display: none !important;
+    }}
+</style>
+"""
+
+# CSS to completely hide sidebar on pages that don't need it
+HIDE_SIDEBAR_CSS = """
+<style>
+    [data-testid="stSidebar"] {
+        display: none !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] {
+        display: none !important;
+    }
+    /* Expand main content to full width when sidebar hidden */
+    .main .block-container {
+        max-width: 100% !important;
+    }
 </style>
 """
 
@@ -459,11 +485,13 @@ def main():
 
     # Page routing
     if not st.session_state.authenticated:
+        st.markdown(HIDE_SIDEBAR_CSS, unsafe_allow_html=True)
         render_global_header(show_signout=False)
         from pages.login import render_login_page
         render_login_page()
 
     elif st.session_state.current_page == "project_select" or st.session_state.selected_project is None:
+        st.markdown(HIDE_SIDEBAR_CSS, unsafe_allow_html=True)
         render_global_header(show_signout=True)
         from pages.project_select import render_project_select_page
         render_project_select_page()
@@ -474,6 +502,7 @@ def main():
         render_workspace_page()
 
     else:
+        st.markdown(HIDE_SIDEBAR_CSS, unsafe_allow_html=True)
         render_global_header(show_signout=True)
         from pages.project_select import render_project_select_page
         render_project_select_page()
