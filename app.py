@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="منصة الذكاء الاصطناعي للمحفظة (أ)",
     page_icon="",
     layout="wide",
-    initial_sidebar_state="auto"
+    initial_sidebar_state="expanded"
 )
 
 # Global CSS for Arabic RTL layout
@@ -33,13 +33,27 @@ GLOBAL_CSS = f"""
         padding-top: 80px;
     }}
 
-    /* Sidebar - RTL */
+    /* Sidebar - RTL: position on the left side of the screen */
     [data-testid="stSidebar"] {{
         direction: rtl;
         text-align: right;
         background-color: #f8f9fa;
-        border-left: 1px solid #e5e7eb;
-        border-right: none;
+        border-left: none;
+        border-right: 1px solid #e5e7eb;
+        min-width: 320px !important;
+        width: 360px !important;
+    }}
+
+    [data-testid="stSidebar"] > div:first-child {{
+        width: 360px !important;
+        min-width: 320px !important;
+    }}
+
+    /* Sidebar inner content */
+    [data-testid="stSidebar"] [data-testid="stSidebarContent"] {{
+        direction: rtl;
+        text-align: right;
+        padding-top: 80px;
     }}
 
     [data-testid="stSidebar"] .stMarkdown {{
@@ -51,6 +65,11 @@ GLOBAL_CSS = f"""
     [data-testid="stSidebar"] h3,
     [data-testid="stSidebar"] h4 {{
         color: {THEME['primary']} !important;
+    }}
+
+    /* Hide sidebar collapse arrow on workspace — keep sidebar always open */
+    [data-testid="stSidebarCollapsedControl"] {{
+        display: none !important;
     }}
 
     /* Headers */

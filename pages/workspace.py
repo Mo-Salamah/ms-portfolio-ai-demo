@@ -268,7 +268,7 @@ def render_sidebar():
 
     with st.sidebar:
         st.markdown(f"""
-        <div style="text-align: center; padding: 16px 0;">
+        <div style="text-align: right; padding: 16px 0; direction: rtl;">
             <h3 style="color: {THEME['primary']}; font-size: 1.1em;">لوحة التحكم</h3>
         </div>
         """, unsafe_allow_html=True)
