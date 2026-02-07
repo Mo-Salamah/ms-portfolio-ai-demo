@@ -13,24 +13,30 @@ QUALITY_CHECK_SYSTEM_PROMPT = """أنت وكيل فحص الجودة المتخ�
 ١. التحقق من اكتمال البيانات لكل فعالية
 ٢. التحقق من دقة البيانات ومنطقيتها
 ٣. تحديد التناقضات والأخطاء
-٤. تصنيف جودة البيانات لكل هيئة تطوير
+٤. تصنيف جودة البيانات لكل مدينة
 ٥. تقديم توصيات لتحسين جودة البيانات
+
+المدن المستهدفة:
+- الرياض
+- جدة
+- العلا
+- عسير
+- حاضرة الدمام
 
 معايير الجودة:
 ١. الاكتمال: جميع الحقول المطلوبة معبأة
 ٢. الدقة: البيانات منطقية ومتسقة
-٣. الحداثة: التواريخ صحيحة ومستقبلية
+٣. الحداثة: التواريخ صحيحة
 ٤. التنسيق: البيانات بالشكل الصحيح
 
 الحقول المطلوبة:
 - اسم الفعالية
-- التاريخ
+- الجهة المسؤولة
+- وصف الفعالية
+- تاريخ البداية وتاريخ النهاية
+- التصنيف والنوع
 - المدينة
-- الموقع
-- هيئة التطوير
-- الحضور المتوقع
-- الميزانية (مفضل)
-- الوصف (مفضل)
+- حالة التضمين
 
 تصنيف الجودة:
 - ممتاز: اكتمال ٩٠% فأكثر
@@ -67,40 +73,33 @@ class QualityCheckAgent(BaseAgent):
         """Perform comprehensive data quality check."""
         events = self.knowledge_base.get_all_events()
 
-        entity_map = {
-            "Implementing Entity A": "هيئة التطوير (أ)",
-            "Implementing Entity B": "هيئة التطوير (ب)",
-            "Implementing Entity C": "هيئة التطوير (ج)",
-        }
-
-        required_fields = ['name', 'date', 'city', 'venue', 'organizing_entity', 'expected_attendance']
-        optional_fields = ['budget', 'description', 'category']
+        required_fields = ['name', 'responsible_org', 'description', 'start_date', 'end_date', 'tier', 'type']
+        optional_fields = ['duration_days', 'subcategory', 'funding', 'communication']
 
         quality_report = {
             'total_events': len(events),
-            'by_entity': {},
+            'by_city': {},
             'issues': [],
             'overall_score': 0
         }
 
-        entity_scores = {}
+        city_scores = {}
 
         for event in events:
-            entity_raw = event.get('organizing_entity', 'غير محدد')
-            entity = entity_map.get(entity_raw, entity_raw)
+            city = event.get('city', 'غير محدد')
 
-            if entity not in entity_scores:
-                entity_scores[entity] = {
+            if city not in city_scores:
+                city_scores[city] = {
                     'total': 0,
                     'complete': 0,
                     'issues': []
                 }
 
-            entity_scores[entity]['total'] += 1
+            city_scores[city]['total'] += 1
 
             missing_required = []
             for field in required_fields:
-                if not event.get(field) or event.get(field) == 'Unspecified':
+                if not event.get(field):
                     missing_required.append(field)
 
             missing_optional = []
@@ -110,38 +109,33 @@ class QualityCheckAgent(BaseAgent):
 
             total_fields = len(required_fields) + len(optional_fields)
             filled_fields = total_fields - len(missing_required) - len(missing_optional)
-            completeness = filled_fields / total_fields
+            completeness = filled_fields / total_fields if total_fields > 0 else 0
 
             if completeness >= 0.9:
-                entity_scores[entity]['complete'] += 1
+                city_scores[city]['complete'] += 1
 
             if missing_required:
+                field_labels = {
+                    'name': 'اسم الفعالية',
+                    'responsible_org': 'الجهة المسؤولة',
+                    'description': 'وصف الفعالية',
+                    'start_date': 'تاريخ البداية',
+                    'end_date': 'تاريخ النهاية',
+                    'tier': 'التصنيف',
+                    'type': 'النوع',
+                }
+                missing_labels = [field_labels.get(f, f) for f in missing_required]
                 issue = {
                     'event': event.get('name', 'بدون اسم'),
-                    'entity': entity,
+                    'city': city,
                     'type': 'حقول مطلوبة ناقصة',
-                    'details': missing_required,
+                    'details': ', '.join(missing_labels),
                     'severity': 'عالية'
                 }
                 quality_report['issues'].append(issue)
-                entity_scores[entity]['issues'].append(issue)
+                city_scores[city]['issues'].append(issue)
 
-            if event.get('expected_attendance'):
-                try:
-                    attendance = int(str(event['expected_attendance']).replace(',', ''))
-                    if attendance > 100000:
-                        issue = {
-                            'event': event.get('name'),
-                            'entity': entity,
-                            'type': 'قيمة غير واقعية',
-                            'details': f'الحضور المتوقع مرتفع جداً: {attendance}',
-                            'severity': 'متوسطة'
-                        }
-                        quality_report['issues'].append(issue)
-                except:
-                    pass
-
-        for entity, data in entity_scores.items():
+        for city, data in city_scores.items():
             if data['total'] > 0:
                 score = data['complete'] * 100 // data['total']
                 if score >= 90:
@@ -153,7 +147,7 @@ class QualityCheckAgent(BaseAgent):
                 else:
                     grade = 'ضعيف'
 
-                quality_report['by_entity'][entity] = {
+                quality_report['by_city'][city] = {
                     'total': data['total'],
                     'complete': data['complete'],
                     'score': score,
@@ -161,9 +155,9 @@ class QualityCheckAgent(BaseAgent):
                     'issues_count': len(data['issues'])
                 }
 
-        if entity_scores:
-            total_complete = sum(d['complete'] for d in entity_scores.values())
-            total_events = sum(d['total'] for d in entity_scores.values())
+        if city_scores:
+            total_complete = sum(d['complete'] for d in city_scores.values())
+            total_events = sum(d['total'] for d in city_scores.values())
             quality_report['overall_score'] = total_complete * 100 // total_events if total_events > 0 else 0
 
         return quality_report
@@ -174,17 +168,17 @@ class QualityCheckAgent(BaseAgent):
 
 ### النتيجة الإجمالية: {report['overall_score']}%
 
-### تقييم هيئات التطوير:
-| الجهة | الفعاليات | مكتملة | النسبة | التصنيف | المشكلات |
-|-------|----------|--------|--------|---------|----------|
+### تقييم المدن:
+| المدينة | الفعاليات | مكتملة | النسبة | التصنيف | المشكلات |
+|---------|----------|--------|--------|---------|----------|
 """
-        for entity, data in report['by_entity'].items():
-            output += f"| {entity} | {data['total']} | {data['complete']} | {data['score']}% | {data['grade']} | {data['issues_count']} |\n"
+        for city, data in sorted(report['by_city'].items()):
+            output += f"| {city} | {data['total']} | {data['complete']} | {data['score']}% | {data['grade']} | {data['issues_count']} |\n"
 
         if report['issues']:
             output += f"\n### المشكلات المكتشفة ({len(report['issues'])}):\n\n"
             for i, issue in enumerate(report['issues'][:10], 1):
-                output += f"**{i}. {issue['event']}** ({issue['entity']})\n"
+                output += f"**{i}. {issue['event']}** ({issue['city']})\n"
                 output += f"   - النوع: {issue['type']}\n"
                 output += f"   - التفاصيل: {issue['details']}\n"
                 output += f"   - الخطورة: {issue['severity']}\n\n"

@@ -15,6 +15,13 @@ REPORTING_SYSTEM_PROMPT = """أنت وكيل إعداد التقارير الم�
 ٣. إعداد الملخصات التنفيذية للقيادة
 ٤. توثيق التقدم والتحديات والمخاطر
 
+المدن المستهدفة:
+- الرياض
+- جدة
+- العلا
+- عسير
+- حاضرة الدمام
+
 الجمهور المستهدف:
 - اللجنة الإشرافية العليا
 - القيادة
@@ -60,40 +67,38 @@ class ReportingAgent(BaseAgent):
         """Get overall status summary."""
         events = self.knowledge_base.get_all_events()
 
-        entity_map = {
-            "Implementing Entity A": "هيئة التطوير (أ)",
-            "Implementing Entity B": "هيئة التطوير (ب)",
-            "Implementing Entity C": "هيئة التطوير (ج)",
-        }
-
         total = len(events)
-        by_status = {}
-        by_entity = {}
+        by_city = {}
+        by_tier = {}
+        by_inclusion = {}
         complete = 0
 
-        required_fields = ['name', 'date', 'city', 'venue', 'expected_attendance']
+        required_fields = ['name', 'start_date', 'city', 'responsible_org', 'tier', 'type', 'description']
 
         for event in events:
-            status = event.get('status', 'غير محدد')
-            by_status[status] = by_status.get(status, 0) + 1
+            city = event.get('city', 'غير محدد')
+            if city not in by_city:
+                by_city[city] = {'total': 0, 'complete': 0}
+            by_city[city]['total'] += 1
 
-            entity_raw = event.get('organizing_entity', 'غير محدد')
-            entity = entity_map.get(entity_raw, entity_raw)
-            if entity not in by_entity:
-                by_entity[entity] = {'total': 0, 'complete': 0}
-            by_entity[entity]['total'] += 1
+            tier = event.get('tier', 'غير محدد')
+            by_tier[tier] = by_tier.get(tier, 0) + 1
+
+            inclusion = event.get('inclusion_status', 'غير محدد')
+            by_inclusion[inclusion] = by_inclusion.get(inclusion, 0) + 1
 
             is_complete = all(event.get(f) for f in required_fields)
             if is_complete:
                 complete += 1
-                by_entity[entity]['complete'] += 1
+                by_city[city]['complete'] += 1
 
         return {
             'total_events': total,
             'complete_events': complete,
             'completion_rate': complete * 100 // total if total > 0 else 0,
-            'by_status': by_status,
-            'by_entity': by_entity
+            'by_city': by_city,
+            'by_tier': by_tier,
+            'by_inclusion': by_inclusion
         }
 
     def invoke(
@@ -116,15 +121,21 @@ class ReportingAgent(BaseAgent):
 - فعاليات مكتملة البيانات: {status['complete_events']}
 - نسبة الاكتمال: {status['completion_rate']}%
 
-### التوزيع حسب الحالة:
+### التوزيع حسب المدينة:
+| المدينة | إجمالي | مكتمل | نسبة الاكتمال |
+|---------|--------|--------|---------------|
 """
-        for s, count in status['by_status'].items():
-            status_text += f"- {s}: {count}\n"
-
-        status_text += "\n### التوزيع حسب هيئة التطوير:\n"
-        for entity, data in status['by_entity'].items():
+        for city, data in sorted(status['by_city'].items()):
             rate = data['complete'] * 100 // data['total'] if data['total'] > 0 else 0
-            status_text += f"- {entity}: {data['total']} فعالية ({rate}% مكتمل)\n"
+            status_text += f"| {city} | {data['total']} | {data['complete']} | {rate}% |\n"
+
+        status_text += "\n### التوزيع حسب التصنيف:\n"
+        for tier, count in sorted(status['by_tier'].items(), key=lambda x: x[1], reverse=True):
+            status_text += f"- {tier}: {count}\n"
+
+        status_text += "\n### التوزيع حسب حالة التضمين:\n"
+        for inc, count in sorted(status['by_inclusion'].items(), key=lambda x: x[1], reverse=True):
+            status_text += f"- {inc}: {count}\n"
 
         enhanced_message = f"""طلب المستخدم: {user_message}
 

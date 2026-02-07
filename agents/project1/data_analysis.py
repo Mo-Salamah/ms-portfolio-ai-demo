@@ -10,15 +10,25 @@ from utils.knowledge_base import KnowledgeBase
 DATA_ANALYSIS_SYSTEM_PROMPT = """أنت وكيل تحليل البيانات المتخصص في نظام لجنة الفعاليات.
 
 مهامك الرئيسية:
-١. تحليل بيانات الفعاليات المستلمة من هيئات التطوير
+١. تحليل بيانات الفعاليات المستلمة من المدن المستهدفة
 ٢. إنتاج تقارير تحليلية وإحصائية
 ٣. تحديد الأنماط والتوزيعات في البيانات
 ٤. تقديم رؤى قابلة للتنفيذ
 
-هيئات التطوير:
-- هيئة التطوير (أ)
-- هيئة التطوير (ب)
-- هيئة التطوير (ج)
+المدن المستهدفة:
+- الرياض
+- جدة
+- العلا
+- عسير
+- حاضرة الدمام
+
+أبعاد التحليل:
+- التوزيع حسب المدينة
+- التوزيع حسب التصنيف (Marquee, Tier 1, Tier 2, Tier 3)
+- التوزيع حسب النوع (أعمال, ترفيه)
+- التوزيع حسب الجهة المسؤولة
+- حالة التضمين (تضمن, لن تضمن, تحسب بدون تضمين)
+- الفترة الزمنية والمدة
 
 أسلوب التحليل:
 - استخدم الجداول للمقارنات
@@ -62,39 +72,39 @@ class DataAnalysisAgent(BaseAgent):
         events = self.knowledge_base.get_all_events()
 
         total = len(events)
-        by_entity = {}
-        by_type = {}
         by_city = {}
+        by_type = {}
         by_tier = {}
+        by_org = {}
+        by_inclusion = {}
         incomplete = []
 
-        # Entity name mapping
-        entity_map = {
-            "Implementing Entity A": "هيئة التطوير (أ)",
-            "Implementing Entity B": "هيئة التطوير (ب)",
-            "Implementing Entity C": "هيئة التطوير (ج)",
-        }
-
         for event in events:
-            entity_raw = event.get('organizing_entity', 'غير محدد')
-            entity = entity_map.get(entity_raw, entity_raw)
-            by_entity[entity] = by_entity.get(entity, 0) + 1
-
-            event_type = event.get('type', 'غير محدد')
-            by_type[event_type] = by_type.get(event_type, 0) + 1
-
             city = event.get('city', 'غير محدد')
             by_city[city] = by_city.get(city, 0) + 1
 
-            tier = event.get('tier', 'غير محدد')
-            by_tier[tier] = by_tier.get(tier, 0) + 1
+            event_type = event.get('type', 'غير محدد')
+            if event_type:
+                by_type[event_type] = by_type.get(event_type, 0) + 1
 
-            required_fields = ['name', 'date', 'city', 'venue', 'organizing_entity']
+            tier = event.get('tier', 'غير محدد')
+            if tier:
+                by_tier[tier] = by_tier.get(tier, 0) + 1
+
+            org = event.get('responsible_org', 'غير محدد')
+            if org:
+                by_org[org] = by_org.get(org, 0) + 1
+
+            inclusion = event.get('inclusion_status', 'غير محدد')
+            if inclusion:
+                by_inclusion[inclusion] = by_inclusion.get(inclusion, 0) + 1
+
+            required_fields = ['name', 'start_date', 'city', 'responsible_org', 'tier', 'type']
             missing = [f for f in required_fields if not event.get(f)]
-            if missing or event.get('status') == 'In Planning':
+            if missing:
                 incomplete.append({
                     'name': event.get('name', 'بدون اسم'),
-                    'entity': entity,
+                    'city': city,
                     'missing': missing
                 })
 
@@ -102,12 +112,21 @@ class DataAnalysisAgent(BaseAgent):
 
 ### الإجمالي: {total} فعالية
 
-### التوزيع حسب هيئة التطوير:
-| الجهة | العدد | النسبة |
-|-------|-------|--------|
+### التوزيع حسب المدينة:
+| المدينة | العدد | النسبة |
+|---------|-------|--------|
 """
-        for entity, count in sorted(by_entity.items(), key=lambda x: x[1], reverse=True):
-            summary += f"| {entity} | {count} | {count*100//total}% |\n"
+        for city, count in sorted(by_city.items(), key=lambda x: x[1], reverse=True):
+            pct = count * 100 // total if total > 0 else 0
+            summary += f"| {city} | {count} | {pct}% |\n"
+
+        summary += f"""
+### التوزيع حسب التصنيف:
+| التصنيف | العدد |
+|---------|-------|
+"""
+        for tier, count in sorted(by_tier.items(), key=lambda x: x[1], reverse=True):
+            summary += f"| {tier} | {count} |\n"
 
         summary += f"""
 ### التوزيع حسب النوع:
@@ -118,27 +137,27 @@ class DataAnalysisAgent(BaseAgent):
             summary += f"| {event_type} | {count} |\n"
 
         summary += f"""
-### التوزيع حسب المدينة:
-| المدينة | العدد |
-|---------|-------|
+### التوزيع حسب حالة التضمين:
+| الحالة | العدد |
+|--------|-------|
 """
-        for city, count in sorted(by_city.items(), key=lambda x: x[1], reverse=True):
-            summary += f"| {city} | {count} |\n"
+        for status, count in sorted(by_inclusion.items(), key=lambda x: x[1], reverse=True):
+            summary += f"| {status} | {count} |\n"
 
         summary += f"""
-### التوزيع حسب التصنيف:
-| التصنيف | العدد |
-|---------|-------|
+### أبرز الجهات المسؤولة (أعلى ١٠):
+| الجهة | العدد |
+|-------|-------|
 """
-        for tier, count in sorted(by_tier.items(), key=lambda x: x[1], reverse=True):
-            summary += f"| {tier} | {count} |\n"
+        for org, count in sorted(by_org.items(), key=lambda x: x[1], reverse=True)[:10]:
+            summary += f"| {org} | {count} |\n"
 
         if incomplete:
             summary += f"""
 ### فعاليات تحتاج استكمال ({len(incomplete)}):
 """
             for item in incomplete[:10]:
-                summary += f"- **{item['name']}** ({item['entity']})"
+                summary += f"- **{item['name']}** ({item['city']})"
                 if item['missing']:
                     summary += f" — حقول ناقصة: {', '.join(item['missing'])}"
                 summary += "\n"
@@ -155,17 +174,14 @@ class DataAnalysisAgent(BaseAgent):
         self._clear_thinking()
         self._log_thinking("تحليل بيانات الفعاليات...")
 
-        # Get events summary from knowledge base
         events_summary = self._get_events_summary()
         self._log_thinking("اكتمل تحليل البيانات — الملخص جاهز")
 
-        # Build context with data
         enhanced_message = f"""طلب المستخدم: {user_message}
 
 البيانات المتاحة للتحليل:
 {events_summary}"""
 
-        # Include uploaded CSV data if available
         if context and context.get('uploaded_data'):
             enhanced_message += f"""
 
