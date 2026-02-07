@@ -19,34 +19,30 @@ GLOBAL_CSS = f"""
     /* Import fonts */
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 
-    /* RTL Layout */
+    /* Global font — do NOT set direction:rtl on .stApp to avoid flipping sidebar */
     .stApp {{
-        direction: rtl;
-        text-align: right;
         font-family: 'Noto Sans Arabic', sans-serif;
     }}
 
-    /* Main content area */
+    /* Main content area — RTL for text only */
     .main .block-container {{
         direction: rtl;
         text-align: right;
         padding-top: 80px;
     }}
 
-    /* Sidebar - RTL: position on the left side of the screen */
+    /* Main section — keep natural Streamlit LTR layout for structure */
+    .main {{
+        /* Don't set direction:rtl here — let Streamlit position sidebar normally */
+    }}
+
+    /* Sidebar styling */
     [data-testid="stSidebar"] {{
         direction: rtl;
         text-align: right;
         background-color: #f8f9fa;
-        border-left: none;
         border-right: 1px solid #e5e7eb;
-        min-width: 320px !important;
-        width: 360px !important;
-    }}
-
-    [data-testid="stSidebar"] > div:first-child {{
-        width: 360px !important;
-        min-width: 320px !important;
+        border-left: none;
     }}
 
     /* Sidebar inner content */
@@ -67,8 +63,23 @@ GLOBAL_CSS = f"""
         color: {THEME['primary']} !important;
     }}
 
-    /* Hide sidebar collapse arrow on workspace — keep sidebar always open */
+    /* Hide sidebar collapse arrow */
     [data-testid="stSidebarCollapsedControl"] {{
+        display: none !important;
+    }}
+
+    /* Hide Streamlit's auto-generated multi-page navigation links */
+    [data-testid="stSidebarNav"] {{
+        display: none !important;
+    }}
+    [data-testid="stSidebarNavItems"] {{
+        display: none !important;
+    }}
+    /* Also hide any nav-link elements */
+    [data-testid="stSidebar"] nav {{
+        display: none !important;
+    }}
+    [data-testid="stSidebar"] ul[data-testid="stSidebarNavItems"] {{
         display: none !important;
     }}
 
@@ -521,24 +532,24 @@ def main():
     if not st.session_state.authenticated:
         st.markdown(HIDE_SIDEBAR_CSS, unsafe_allow_html=True)
         render_global_header(show_signout=False)
-        from pages.login import render_login_page
+        from views.login import render_login_page
         render_login_page()
 
     elif st.session_state.current_page == "project_select" or st.session_state.selected_project is None:
         st.markdown(HIDE_SIDEBAR_CSS, unsafe_allow_html=True)
         render_global_header(show_signout=True)
-        from pages.project_select import render_project_select_page
+        from views.project_select import render_project_select_page
         render_project_select_page()
 
     elif st.session_state.current_page == "workspace":
         render_global_header(show_signout=True)
-        from pages.workspace import render_workspace_page
+        from views.workspace import render_workspace_page
         render_workspace_page()
 
     else:
         st.markdown(HIDE_SIDEBAR_CSS, unsafe_allow_html=True)
         render_global_header(show_signout=True)
-        from pages.project_select import render_project_select_page
+        from views.project_select import render_project_select_page
         render_project_select_page()
 
 
